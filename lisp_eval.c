@@ -103,6 +103,16 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 	return temp;
 }
 
+struct cell* evcond(struct cell* exp, struct cell* env)
+{
+	if(tee == eval(car(car(exp)), env))
+	{
+		return eval(car(cdr(car(exp))), env);
+	}
+
+	return evcond(cdr(exp), env);
+}
+
 struct cell* eval(struct cell* exp, struct cell* env)
 {
 	if(exp == nil) return nil;
@@ -130,6 +140,7 @@ struct cell* eval(struct cell* exp, struct cell* env)
 				}
 				return eval(car(cdr(cdr(cdr(exp)))), env);
 			}
+			if(car(exp) == s_cond) return evcond(cdr(exp), env);
 			if(car(exp) == s_lambda) return make_proc(car(cdr(exp)), cdr(cdr(exp)), env);
 			if(car(exp) == quote) return car(cdr(exp));
 			if(car(exp) == s_define) return(extend_top(car(cdr(exp)), eval(car(cdr(cdr(exp))), env)));
@@ -199,10 +210,11 @@ void init_sl3()
 	nil = make_sym("nil");
 	all_symbols = make_cons(nil, nil);
 	top_env = make_cons(make_cons(nil, nil), nil);
-	tee = intern("t");
+	tee = intern("#t");
 	extend_top(tee, tee);
 	quote = intern("quote");
 	s_if = intern("if");
+	s_cond = intern("cond");
 	s_lambda = intern("lambda");
 	s_define = intern("define");
 	s_setb = intern("set!");
