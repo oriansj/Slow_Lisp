@@ -194,7 +194,15 @@ struct cell* prim_prod(struct cell* args)
 
 struct cell* prim_numeq(struct cell* args)
 {
-	return car(args)->value == car(cdr(args))->value ? tee : nil;
+	int temp = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		if(temp != car(args)->value)
+		{
+			return nil;
+		}
+	}
+	return tee;
 }
 
 struct cell* prim_cons(struct cell* args) { return make_cons(car(args), car(cdr(args))); }
