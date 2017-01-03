@@ -192,6 +192,34 @@ struct cell* prim_prod(struct cell* args)
 	return make_int(prod);
 }
 
+struct cell* prim_numgt(struct cell* args)
+{
+	int temp = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		if(temp <= car(args)->value)
+		{
+			return nil;
+		}
+		temp = car(args)->value;
+	}
+	return tee;
+}
+
+struct cell* prim_numge(struct cell* args)
+{
+	int temp = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		if(temp < car(args)->value)
+		{
+			return nil;
+		}
+		temp = car(args)->value;
+	}
+	return tee;
+}
+
 struct cell* prim_numeq(struct cell* args)
 {
 	int temp = car(args)->value;
@@ -201,6 +229,34 @@ struct cell* prim_numeq(struct cell* args)
 		{
 			return nil;
 		}
+	}
+	return tee;
+}
+
+struct cell* prim_numle(struct cell* args)
+{
+	int temp = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		if(temp > car(args)->value)
+		{
+			return nil;
+		}
+		temp = car(args)->value;
+	}
+	return tee;
+}
+
+struct cell* prim_numlt(struct cell* args)
+{
+	int temp = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		if(temp >= car(args)->value)
+		{
+			return nil;
+		}
+		temp = car(args)->value;
 	}
 	return tee;
 }
@@ -229,7 +285,11 @@ void init_sl3()
 	extend_top(intern("+"), make_prim(prim_sum));
 	extend_top(intern("-"), make_prim(prim_sub));
 	extend_top(intern("*"), make_prim(prim_prod));
+	extend_top(intern(">"), make_prim(prim_numgt));
+	extend_top(intern(">="), make_prim(prim_numge));
 	extend_top(intern("="), make_prim(prim_numeq));
+	extend_top(intern("<="), make_prim(prim_numle));
+	extend_top(intern("<"), make_prim(prim_numlt));
 	extend_top(intern("cons"), make_prim(prim_cons));
 	extend_top(intern("car"), make_prim(prim_car));
 	extend_top(intern("cdr"), make_prim(prim_cdr));
