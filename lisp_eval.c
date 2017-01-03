@@ -192,6 +192,27 @@ struct cell* prim_prod(struct cell* args)
 	return make_int(prod);
 }
 
+struct cell* prim_div(struct cell* args)
+{
+	int div = car(args)->value;
+	for(args = cdr(args); nil != args; args = cdr(args))
+	{
+		div = div / car(args)->value;
+	}
+	return make_int(div);
+}
+
+struct cell* prim_mod(struct cell* args)
+{
+	int mod = car(args)->value % car(cdr(args))->value;
+	if(nil != cdr(cdr(args)))
+	{
+		printf("wrong number of arguments to mod\n");
+		exit(EXIT_FAILURE);
+	}
+	return make_int(mod);
+}
+
 struct cell* prim_numgt(struct cell* args)
 {
 	int temp = car(args)->value;
@@ -285,6 +306,8 @@ void init_sl3()
 	extend_top(intern("+"), make_prim(prim_sum));
 	extend_top(intern("-"), make_prim(prim_sub));
 	extend_top(intern("*"), make_prim(prim_prod));
+	extend_top(intern("/"), make_prim(prim_div));
+	extend_top(intern("mod"), make_prim(prim_mod));
 	extend_top(intern(">"), make_prim(prim_numgt));
 	extend_top(intern(">="), make_prim(prim_numge));
 	extend_top(intern("="), make_prim(prim_numeq));
