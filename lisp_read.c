@@ -228,7 +228,7 @@ uint32_t Readline(FILE* source_file, char* temp)
 	}
 
 Line_complete:
-	if(1 >= i)
+	if(1 > i)
 	{
 		return Readline(source_file, temp);
 	}
