@@ -295,6 +295,15 @@ struct cell* prim_numlt(struct cell* args)
 	return tee;
 }
 
+struct cell* prim_listp(struct cell* args)
+{
+	if(CONS == car(args)->type)
+	{
+		return tee;
+	}
+	return nil;
+}
+
 struct cell* prim_display(struct cell* args)
 {
 	for(; nil != args; args = cdr(args))
@@ -332,6 +341,7 @@ struct cell* prim_ascii(struct cell* args)
 	return args;
 }
 
+struct cell* prim_list(struct cell* args) {return args;}
 struct cell* prim_cons(struct cell* args) { return make_cons(car(args), car(cdr(args))); }
 struct cell* prim_car(struct cell* args) { return car(car(args)); }
 struct cell* prim_cdr(struct cell* args) { return cdr(car(args)); }
@@ -366,6 +376,8 @@ void init_sl3()
 	extend_top(intern("<"), make_prim(prim_numlt));
 	extend_top(intern("display"), make_prim(prim_display));
 	extend_top(intern("ascii!"), make_prim(prim_ascii));
+	extend_top(intern("list?"), make_prim(prim_listp));
+	extend_top(intern("list"), make_prim(prim_list));
 	extend_top(intern("cons"), make_prim(prim_cons));
 	extend_top(intern("car"), make_prim(prim_car));
 	extend_top(intern("cdr"), make_prim(prim_cdr));
