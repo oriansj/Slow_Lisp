@@ -1,17 +1,6 @@
 #include "lisp.h"
 
 /* Support functions */
-struct cell* car(struct cell* a)
-{
-	return a->car;
-}
-
-struct cell* cdr(struct cell* a)
-{
-	return a->cdr;
-}
-
-
 struct cell* findsym(char *name)
 {
 	struct cell* symlist;
@@ -48,20 +37,20 @@ if(nil == syms)
 	{
 		return env;
 	}
-	return multiple_extend(extend(env, car(syms), car(vals)), cdr(syms), cdr(vals));
+	return multiple_extend(extend(env, syms->car, vals->car), syms->cdr, vals->cdr);
 }
 
 struct cell* extend_top(struct cell* sym, struct cell* val)
 {
-	top_env->cdr = make_cons(make_cons(sym, val), cdr(top_env));
+	top_env->cdr = make_cons(make_cons(sym, val), top_env->cdr);
 	return val;
 }
 
 struct cell* assoc(struct cell* key, struct cell* alist)
 {
 	if(nil == alist) return nil;
-	if(car(car(alist)) == key) return car(alist);
-	return assoc(key, cdr(alist));
+	if(alist->car->car == key) return alist->car;
+	return assoc(key, alist->cdr);
 }
 
 /*** Evaluator (Eval/Apply) ***/
@@ -70,7 +59,7 @@ struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env);
 struct cell* evlis(struct cell* exps, struct cell* env)
 {
 	if(exps == nil) return nil;
-	return make_cons(eval(car(exps), env), evlis(cdr(exps), env));
+	return make_cons(eval(exps->car, env), evlis(exps->cdr, env));
 }
 
 struct cell* progn(struct cell* exps, struct cell* env)
@@ -78,9 +67,9 @@ struct cell* progn(struct cell* exps, struct cell* env)
 	if(exps == nil) return nil;
 	for(;;)
 	{
-		if(cdr(exps) == nil) return eval(car(exps), env);
-		eval(car(exps), env);
-		exps = cdr(exps);
+		if(exps->cdr == nil) return eval(exps->car, env);
+		eval(exps->car, env);
+		exps = exps->cdr;
 	}
 }
 
@@ -105,21 +94,21 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 
 struct cell* evcond(struct cell* exp, struct cell* env)
 {
-	if(tee == eval(car(car(exp)), env))
+	if(tee == eval(exp->car->car, env))
 	{
-		return eval(car(cdr(car(exp))), env);
+		return eval(exp->car->cdr->car, env);
 	}
 
-	return evcond(cdr(exp), env);
+	return evcond(exp->cdr, env);
 }
 
 struct cell* prim_begin(struct cell* exp, struct cell* env)
 {
 	struct cell* ret;
-	ret = eval(car(exp), env);
-	if(nil != cdr(exp))
+	ret = eval(exp->car, env);
+	if(nil != exp->cdr)
 	{
-		ret = prim_begin(cdr(exp), env);
+		ret = prim_begin(exp->cdr, env);
 	}
 	return ret;
 }
@@ -139,31 +128,31 @@ struct cell* eval(struct cell* exp, struct cell* env)
 				fprintf(stderr,"Unbound symbol\n");
 				exit(EXIT_FAILURE);
 			}
-			return cdr(tmp);
+			return tmp->cdr;
 		}
 		case CONS:
 		{
-			if(car(exp) == s_if)
+			if(exp->car == s_if)
 			{
-				if(eval(car(cdr(exp)), env) != nil)
+				if(eval(exp->cdr->car, env) != nil)
 				{
-					return eval(car(cdr(cdr(exp))), env);
+					return eval(exp->cdr->cdr->car, env);
 				}
-				return eval(car(cdr(cdr(cdr(exp)))), env);
+				return eval(exp->cdr->cdr->cdr->car, env);
 			}
-			if(car(exp) == s_cond) return evcond(cdr(exp), env);
-			if(car(exp) == s_begin) return prim_begin(cdr(exp), env);
-			if(car(exp) == s_lambda) return make_proc(car(cdr(exp)), cdr(cdr(exp)), env);
-			if(car(exp) == quote) return car(cdr(exp));
-			if(car(exp) == s_define) return(extend_top(car(cdr(exp)), eval(car(cdr(cdr(exp))), env)));
-			if(car(exp) == s_setb)
+			if(exp->car == s_cond) return evcond(exp->cdr, env);
+			if(exp->car == s_begin) return prim_begin(exp->cdr, env);
+			if(exp->car == s_lambda) return make_proc(exp->cdr->car, exp->cdr->cdr, env);
+			if(exp->car == quote) return exp->cdr->car;
+			if(exp->car == s_define) return(extend_top(exp->cdr->car, eval(exp->cdr->cdr->car, env)));
+			if(exp->car == s_setb)
 			{
-				struct cell* pair = assoc(car(cdr(exp)), env);
-				struct cell* newval = eval(car(cdr(cdr(exp))), env);
+				struct cell* pair = assoc(exp->cdr->car, env);
+				struct cell* newval = eval(exp->cdr->cdr->car, env);
 				pair->cdr = newval;
 				return newval;
 			}
-			return apply(eval(car(exp), env), evlis(cdr(exp), env));
+			return apply(eval(exp->car, env), evlis(exp->cdr, env));
 		}
 		case PRIMOP: return exp;
 		case PROC: return exp;
@@ -178,19 +167,19 @@ struct cell* make_int(int a);
 struct cell* prim_sum(struct cell* args)
 {
 	int sum;
-	for(sum = 0; nil != args; args = cdr(args))
+	for(sum = 0; nil != args; args = args->cdr)
 	{
-		sum = sum + car(args)->value;
+		sum = sum + args->car->value;
 	}
 	return make_int(sum);
 }
 
 struct cell* prim_sub(struct cell* args)
 {
-	int sum = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int sum = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		 sum = sum - car(args)->value;
+		 sum = sum - args->car->value;
 	}
 	return make_int(sum);
 }
@@ -198,27 +187,27 @@ struct cell* prim_sub(struct cell* args)
 struct cell* prim_prod(struct cell* args)
 {
 	int prod;
-	for(prod = 1; nil != args; args = cdr(args))
+	for(prod = 1; nil != args; args = args->cdr)
 	{
-		prod = prod * car(args)->value;
+		prod = prod * args->car->value;
 	}
 	return make_int(prod);
 }
 
 struct cell* prim_div(struct cell* args)
 {
-	int div = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int div = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		div = div / car(args)->value;
+		div = div / args->car->value;
 	}
 	return make_int(div);
 }
 
 struct cell* prim_mod(struct cell* args)
 {
-	int mod = car(args)->value % car(cdr(args))->value;
-	if(nil != cdr(cdr(args)))
+	int mod = args->car->value % args->cdr->car->value;
+	if(nil != args->cdr->cdr)
 	{
 		printf("wrong number of arguments to mod\n");
 		exit(EXIT_FAILURE);
@@ -228,38 +217,38 @@ struct cell* prim_mod(struct cell* args)
 
 struct cell* prim_numgt(struct cell* args)
 {
-	int temp = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int temp = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(temp <= car(args)->value)
+		if(temp <= args->car->value)
 		{
 			return nil;
 		}
-		temp = car(args)->value;
+		temp = args->car->value;
 	}
 	return tee;
 }
 
 struct cell* prim_numge(struct cell* args)
 {
-	int temp = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int temp = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(temp < car(args)->value)
+		if(temp < args->car->value)
 		{
 			return nil;
 		}
-		temp = car(args)->value;
+		temp = args->car->value;
 	}
 	return tee;
 }
 
 struct cell* prim_numeq(struct cell* args)
 {
-	int temp = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int temp = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(temp != car(args)->value)
+		if(temp != args->car->value)
 		{
 			return nil;
 		}
@@ -269,35 +258,35 @@ struct cell* prim_numeq(struct cell* args)
 
 struct cell* prim_numle(struct cell* args)
 {
-	int temp = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int temp = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(temp > car(args)->value)
+		if(temp > args->car->value)
 		{
 			return nil;
 		}
-		temp = car(args)->value;
+		temp = args->car->value;
 	}
 	return tee;
 }
 
 struct cell* prim_numlt(struct cell* args)
 {
-	int temp = car(args)->value;
-	for(args = cdr(args); nil != args; args = cdr(args))
+	int temp = args->car->value;
+	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(temp >= car(args)->value)
+		if(temp >= args->car->value)
 		{
 			return nil;
 		}
-		temp = car(args)->value;
+		temp = args->car->value;
 	}
 	return tee;
 }
 
 struct cell* prim_listp(struct cell* args)
 {
-	if(CONS == car(args)->type)
+	if(CONS == args->car->type)
 	{
 		return tee;
 	}
@@ -306,23 +295,23 @@ struct cell* prim_listp(struct cell* args)
 
 struct cell* prim_display(struct cell* args)
 {
-	for(; nil != args; args = cdr(args))
+	for(; nil != args; args = args->cdr)
 	{
-		if(INT == car(args)->type)
+		if(INT == args->car->type)
 		{
-			printf("%d", car(args)->value);
+			printf("%d", args->car->value);
 		}
-		else if(ASCII == car(args)->type)
+		else if(ASCII == args->car->type)
 		{
-			printf("%c", car(args)->value);
+			printf("%c", args->car->value);
 		}
-		else if(CONS == car(args)->type)
+		else if(CONS == args->car->type)
 		{
 			prim_display(args->car);
 		}
 		else
 		{
-			printf("%s", car(args)->string);
+			printf("%s", args->car->string);
 		}
 	}
 	return tee;
@@ -331,20 +320,20 @@ struct cell* prim_display(struct cell* args)
 struct cell* prim_ascii(struct cell* args)
 {
 	struct cell* temp;
-	for(temp = args; nil != temp; temp = cdr(temp))
+	for(temp = args; nil != temp; temp = temp->cdr)
 	{
-		if(INT == car(temp)->type)
+		if(INT == temp->car->type)
 		{
-			car(temp)->type = ASCII;
+			temp->car->type = ASCII;
 		}
 	}
 	return args;
 }
 
 struct cell* prim_list(struct cell* args) {return args;}
-struct cell* prim_cons(struct cell* args) { return make_cons(car(args), car(cdr(args))); }
-struct cell* prim_car(struct cell* args) { return car(car(args)); }
-struct cell* prim_cdr(struct cell* args) { return cdr(car(args)); }
+struct cell* prim_cons(struct cell* args) { return make_cons(args->car, args->cdr->car); }
+struct cell* prim_car(struct cell* args) { return args->car->car; }
+struct cell* prim_cdr(struct cell* args) { return args->car->cdr; }
 
 /*** Initialization ***/
 struct cell* intern(char *name);
