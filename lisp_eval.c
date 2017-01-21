@@ -113,6 +113,17 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 	return evcond(cdr(exp), env);
 }
 
+struct cell* prim_begin(struct cell* exp, struct cell* env)
+{
+	struct cell* ret;
+	ret = eval(car(exp), env);
+	if(nil != cdr(exp))
+	{
+		ret = prim_begin(cdr(exp), env);
+	}
+	return ret;
+}
+
 struct cell* eval(struct cell* exp, struct cell* env)
 {
 	if(exp == nil) return nil;
@@ -141,6 +152,7 @@ struct cell* eval(struct cell* exp, struct cell* env)
 				return eval(car(cdr(cdr(cdr(exp)))), env);
 			}
 			if(car(exp) == s_cond) return evcond(cdr(exp), env);
+			if(car(exp) == s_begin) return prim_begin(cdr(exp), env);
 			if(car(exp) == s_lambda) return make_proc(car(cdr(exp)), cdr(cdr(exp)), env);
 			if(car(exp) == quote) return car(cdr(exp));
 			if(car(exp) == s_define) return(extend_top(car(cdr(exp)), eval(car(cdr(cdr(exp))), env)));
@@ -155,6 +167,7 @@ struct cell* eval(struct cell* exp, struct cell* env)
 		}
 		case PRIMOP: return exp;
 		case PROC: return exp;
+		default: return exp;
 	}
 	/* Not reached */
 	return exp;
@@ -340,6 +353,7 @@ void init_sl3()
 	s_lambda = intern("lambda");
 	s_define = intern("define");
 	s_setb = intern("set!");
+	s_begin = intern("begin");
 	extend_top(intern("+"), make_prim(prim_sum));
 	extend_top(intern("-"), make_prim(prim_sub));
 	extend_top(intern("*"), make_prim(prim_prod));
