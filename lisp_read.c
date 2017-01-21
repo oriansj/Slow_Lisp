@@ -104,6 +104,12 @@ bool is_integer(char* a)
 
 struct cell* atom(struct cell* a)
 {
+	/* Check for quotes */
+	if('\'' == a->string[0])
+	{
+		a->string = a->string + 1;
+		return make_cons(quote, make_cons(a, nil));
+	}
 	/* Check for integer */
 	if(is_integer(a->string))
 	{
