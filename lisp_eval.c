@@ -49,8 +49,11 @@ struct cell* extend_top(struct cell* sym, struct cell* val)
 struct cell* assoc(struct cell* key, struct cell* alist)
 {
 	if(nil == alist) return nil;
-	if(alist->car->car == key) return alist->car;
-	return assoc(key, alist->cdr);
+	for(; nil != alist; alist = alist->cdr)
+	{
+		if(alist->car->car == key) return alist->car;
+	}
+	return nil;
 }
 
 /*** Evaluator (Eval/Apply) ***/
