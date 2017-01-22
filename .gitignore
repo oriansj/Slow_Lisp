@@ -1,9 +1,7 @@
-# Some basic junk files
-test
-foo
 # The compiled lisp
 lisp
 # temp files
 *.swp
 *.tmp
+*.qst
 
