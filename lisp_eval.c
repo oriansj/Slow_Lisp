@@ -33,7 +33,7 @@ struct cell* extend(struct cell* env, struct cell* symbol, struct cell* value)
 
 struct cell* multiple_extend(struct cell* env, struct cell* syms, struct cell* vals)
 {
-if(nil == syms)
+	if(nil == syms)
 	{
 		return env;
 	}
