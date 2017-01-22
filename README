@@ -1,0 +1,4 @@
+This is just a simple lisp interpreter that I am working on for fun.
+This is to help me figure out what I want to create when I write a Lisp interpreter in assembly for stage0.
+It also shows how a trivial garbage collector is implemented using fixed sized allocations.
+Everything here should be trivial C code.
