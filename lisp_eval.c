@@ -222,7 +222,7 @@ struct cell* prim_and(struct cell* args)
 {
 	for(; nil != args; args = args->cdr)
 	{
-		if(nil == args->car) return nil;
+		if(tee != args->car) return nil;
 	}
 	return tee;
 }
@@ -238,7 +238,7 @@ struct cell* prim_or(struct cell* args)
 
 struct cell* prim_not(struct cell* args)
 {
-	if(nil == args->car) return tee;
+	if(tee != args->car) return tee;
 	return nil;
 }
 
