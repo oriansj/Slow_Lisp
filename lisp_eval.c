@@ -218,6 +218,30 @@ struct cell* prim_mod(struct cell* args)
 	return make_int(mod);
 }
 
+struct cell* prim_and(struct cell* args)
+{
+	for(; nil != args; args = args->cdr)
+	{
+		if(nil == args->car) return nil;
+	}
+	return tee;
+}
+
+struct cell* prim_or(struct cell* args)
+{
+	for(; nil != args; args = args->cdr)
+	{
+		if(tee == args->car) return tee;
+	}
+	return nil;
+}
+
+struct cell* prim_not(struct cell* args)
+{
+	if(nil == args->car) return tee;
+	return nil;
+}
+
 struct cell* prim_numgt(struct cell* args)
 {
 	int temp = args->car->value;
@@ -320,6 +344,16 @@ struct cell* prim_display(struct cell* args)
 	return tee;
 }
 
+int64_t cells_remaining();
+struct cell* prim_freecell(struct cell* args)
+{
+	if(nil == args)
+	{
+		printf("Remaining Cells: ");
+	}
+	return make_int(cells_remaining());
+}
+
 struct cell* prim_ascii(struct cell* args)
 {
 	struct cell* temp;
@@ -361,12 +395,16 @@ void init_sl3()
 	extend_top(intern("*"), make_prim(prim_prod));
 	extend_top(intern("/"), make_prim(prim_div));
 	extend_top(intern("mod"), make_prim(prim_mod));
+	extend_top(intern("and"), make_prim(prim_and));
+	extend_top(intern("or"), make_prim(prim_or));
+	extend_top(intern("not"), make_prim(prim_not));
 	extend_top(intern(">"), make_prim(prim_numgt));
 	extend_top(intern(">="), make_prim(prim_numge));
 	extend_top(intern("="), make_prim(prim_numeq));
 	extend_top(intern("<="), make_prim(prim_numle));
 	extend_top(intern("<"), make_prim(prim_numlt));
 	extend_top(intern("display"), make_prim(prim_display));
+	extend_top(intern("free_mem"), make_prim(prim_freecell));
 	extend_top(intern("ascii!"), make_prim(prim_ascii));
 	extend_top(intern("list?"), make_prim(prim_listp));
 	extend_top(intern("list"), make_prim(prim_list));
