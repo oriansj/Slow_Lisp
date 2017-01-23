@@ -1,8 +1,14 @@
 #include "lisp.h"
 
 struct cell *free_cells, *gc_block_start, *gc_block_end;
+int64_t left_to_take;
 
 int64_t cells_remaining()
+{
+	return left_to_take;
+}
+
+void update_remaining()
 {
 	int64_t count = 0;
 	struct cell* i = free_cells;
@@ -11,7 +17,7 @@ int64_t cells_remaining()
 		count = count + 1;
 		i = i->cdr;
 	}
-	return count;
+	left_to_take = count;
 }
 
 void reclaim_marked()
@@ -71,6 +77,7 @@ void garbage_collect()
 	unmark_cells(s_cond);
 	unmark_cells(s_begin);
 	reclaim_marked();
+	update_remaining();
 }
 
 void garbage_init()
@@ -93,6 +100,7 @@ struct cell* pop_cons()
 	i = free_cells;
 	free_cells = i->cdr;
 	i->cdr = NULL;
+	left_to_take = left_to_take - 1;
 	return i;
 }
 
