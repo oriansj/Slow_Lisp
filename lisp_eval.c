@@ -28,7 +28,7 @@ struct cell* intern(char *name)
 /*** Environment ***/
 struct cell* extend(struct cell* env, struct cell* symbol, struct cell* value)
 {
-	return make_cons(make_cons((symbol), (value)), (env));
+	return make_cons(make_cons(symbol, value), env);
 }
 
 struct cell* multiple_extend(struct cell* env, struct cell* syms, struct cell* vals)
