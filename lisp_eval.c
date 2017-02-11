@@ -97,6 +97,12 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 
 struct cell* evcond(struct cell* exp, struct cell* env)
 {
+	/* Return nil but the result is technically undefined per the standard */
+	if(nil == exp)
+	{
+		return nil;
+	}
+
 	if(tee == eval(exp->car->car, env))
 	{
 		return eval(exp->car->cdr->car, env);
