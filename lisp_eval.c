@@ -111,23 +111,6 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 	return evcond(exp->cdr, env);
 }
 
-struct cell* prim_begin(struct cell* exp, struct cell* env)
-{
-	/* Return nil for an empty begin list per the hyperspec */
-	if(nil == exp)
-	{
-		return nil;
-	}
-
-	struct cell* ret;
-	ret = eval(exp->car, env);
-	if(nil != exp->cdr)
-	{
-		ret = prim_begin(exp->cdr, env);
-	}
-	return ret;
-}
-
 struct cell* eval(struct cell* exp, struct cell* env)
 {
 	if(exp == nil) return nil;
@@ -156,7 +139,7 @@ struct cell* eval(struct cell* exp, struct cell* env)
 				return eval(exp->cdr->cdr->cdr->car, env);
 			}
 			if(exp->car == s_cond) return evcond(exp->cdr, env);
-			if(exp->car == s_begin) return prim_begin(exp->cdr, env);
+			if(exp->car == s_begin) return progn(exp->cdr, env);
 			if(exp->car == s_lambda) return make_proc(exp->cdr->car, exp->cdr->cdr, env);
 			if(exp->car == quote) return exp->cdr->car;
 			if(exp->car == s_define) return(extend_top(exp->cdr->car, eval(exp->cdr->cdr->car, env)));
