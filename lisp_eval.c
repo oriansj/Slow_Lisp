@@ -113,6 +113,12 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 
 struct cell* prim_begin(struct cell* exp, struct cell* env)
 {
+	/* Return nil for an empty begin list per the hyperspec */
+	if(nil == exp)
+	{
+		return nil;
+	}
+
 	struct cell* ret;
 	ret = eval(exp->car, env);
 	if(nil != exp->cdr)
