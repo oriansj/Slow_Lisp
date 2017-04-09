@@ -5,3 +5,6 @@ lisp
 *.tmp
 *.qst
 
+# Where you write output
+tape_02
+

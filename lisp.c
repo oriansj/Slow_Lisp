@@ -15,6 +15,7 @@ int main()
 {
 	garbage_init();
 	init_sl3();
+	output = fopen("tape_02", "w");
 	for(;;)
 	{
 		garbage_collect();
@@ -26,5 +27,6 @@ int main()
 		writeobj(stdout, temp);
 		printf("\n");
 	}
+	fclose(output);
 	return 0;
 }
