@@ -37,18 +37,35 @@ void update_remaining()
 	left_to_take = count;
 }
 
+struct cell* insert_ordered(struct cell* i, struct cell* list)
+{
+	if(NULL == list)
+	{
+		return i;
+	}
+
+	if(i < list)
+	{
+		i->cdr = list;
+		return i;
+	}
+
+	list->cdr = insert_ordered(i, list->cdr);
+	return list;
+}
+
 void reclaim_marked()
 {
 	struct cell* i;
-	for(i= gc_block_start; i < top_allocated; i = i + 1)
+	for(i= top_allocated; i >= gc_block_start ; i = i - 1)
 	{
 		if(i->type & MARKED)
 		{
 			i->type = FREE;
 			i->car = NULL;
-			i->cdr = free_cells;
+			i->cdr = NULL;
 			i->env = NULL;
-			free_cells = i;
+			free_cells = insert_ordered(i, free_cells);
 		}
 	}
 }
