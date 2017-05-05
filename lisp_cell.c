@@ -17,8 +17,8 @@
 
 #include "lisp.h"
 
-struct cell *free_cells, *gc_block_start, *gc_block_end;
-int64_t left_to_take;
+struct cell *free_cells, *gc_block_start, *top_allocated;
+int64_t left_to_take, total_cells;
 
 int64_t cells_remaining()
 {
@@ -40,7 +40,7 @@ void update_remaining()
 void reclaim_marked()
 {
 	struct cell* i;
-	for(i= gc_block_start; i < gc_block_end; i = i + 1)
+	for(i= gc_block_start; i < top_allocated; i = i + 1)
 	{
 		if(i->type & MARKED)
 		{
@@ -56,7 +56,7 @@ void reclaim_marked()
 void mark_all_cells()
 {
 	struct cell* i;
-	for(i= gc_block_start; i < gc_block_end; i = i + 1)
+	for(i= gc_block_start; i < top_allocated; i = i + 1)
 	{
 		/* if not in the free list */
 		if(!(i->type & FREE))
@@ -79,6 +79,23 @@ void unmark_cells(struct cell* list)
 	}
 }
 
+void find_top_allocated(struct cell* list)
+{
+	for(; NULL != list; list = list->cdr)
+	{
+		if(top_allocated < list)
+		{
+			top_allocated = list;
+		}
+
+		if((list->type & CONS)|| list->type & PROC )
+		{
+			find_top_allocated(list->car);
+		}
+	}
+}
+
+
 void garbage_collect()
 {
 	mark_all_cells();
@@ -90,11 +107,12 @@ void garbage_collect()
 
 void garbage_init()
 {
-	int number_of_Cells = 1000000;
-	gc_block_start = calloc(number_of_Cells + 1, sizeof(cell));
-	gc_block_end = gc_block_start + number_of_Cells;
+	total_cells = 1000000;
+	gc_block_start = calloc(total_cells + 1, sizeof(cell));
+	top_allocated = gc_block_start + total_cells;
 	free_cells = NULL;
 	garbage_collect();
+	top_allocated = NULL;
 }
 
 struct cell* pop_cons()
@@ -108,6 +126,10 @@ struct cell* pop_cons()
 	i = free_cells;
 	free_cells = i->cdr;
 	i->cdr = NULL;
+	if(i > top_allocated)
+	{
+		top_allocated = i;
+	}
 	left_to_take = left_to_take - 1;
 	return i;
 }
