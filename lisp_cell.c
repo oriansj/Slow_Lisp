@@ -146,23 +146,6 @@ void unmark_cells(struct cell* list)
 	}
 }
 
-void find_top_allocated(struct cell* list)
-{
-	for(; NULL != list; list = list->cdr)
-	{
-		if(top_allocated < list)
-		{
-			top_allocated = list;
-		}
-
-		if((list->type & CONS)|| list->type & PROC )
-		{
-			find_top_allocated(list->car);
-		}
-	}
-}
-
-
 void garbage_collect()
 {
 	mark_all_cells();
