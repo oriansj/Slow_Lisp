@@ -70,6 +70,56 @@ void reclaim_marked()
 	}
 }
 
+void relocate_cell(struct cell* current, struct cell* target, struct cell* list)
+{
+	for(; NULL != list; list = list->cdr)
+	{
+		if(list->car == current)
+		{
+			list->car = target;
+		}
+
+		if(list->cdr == current)
+		{
+			list->cdr = target;
+		}
+
+		if(list->env == current)
+		{
+			list->env = target;
+		}
+
+		if((list->type & CONS)|| list->type & PROC )
+		{
+			relocate_cell(current, target, list->car);
+		}
+	}
+}
+
+struct cell* pop_cons();
+void compact(struct cell* list)
+{
+	for(; NULL != list; list = list->cdr)
+	{
+		if((FREE != list->type) && (list > free_cells ))
+		{
+			struct cell* temp = pop_cons();
+			temp->type = list->type;
+			temp->car = list->car;
+			temp->cdr = list->cdr;
+			temp->env = list->env;
+			relocate_cell(list, temp, all_symbols);
+			relocate_cell(list, temp, top_env);
+		}
+
+		if((list->type & CONS)|| list->type & PROC )
+		{
+			compact(list->car);
+		}
+	}
+}
+
+
 void mark_all_cells()
 {
 	struct cell* i;
@@ -120,6 +170,9 @@ void garbage_collect()
 	unmark_cells(top_env);
 	reclaim_marked();
 	update_remaining();
+	compact(all_symbols);
+	compact(top_env);
+	top_allocated = NULL;
 }
 
 void garbage_init()
