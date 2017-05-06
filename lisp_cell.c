@@ -18,7 +18,7 @@
 #include "lisp.h"
 
 struct cell *free_cells, *gc_block_start, *top_allocated;
-int64_t left_to_take, total_cells;
+int64_t left_to_take;
 
 int64_t cells_remaining()
 {
@@ -160,9 +160,9 @@ void garbage_collect()
 
 void garbage_init()
 {
-	total_cells = 1000000;
-	gc_block_start = calloc(total_cells + 1, sizeof(cell));
-	top_allocated = gc_block_start + total_cells;
+	int number_of_Cells = 1000000;
+	gc_block_start = calloc(number_of_Cells + 1, sizeof(cell));
+	top_allocated = gc_block_start + number_of_Cells;
 	free_cells = NULL;
 	garbage_collect();
 	top_allocated = NULL;
