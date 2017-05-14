@@ -57,9 +57,9 @@ struct cell* multiple_extend(struct cell* env, struct cell* syms, struct cell* v
 	return multiple_extend(extend(env, syms->car, vals->car), syms->cdr, vals->cdr);
 }
 
-struct cell* extend_top(struct cell* sym, struct cell* val)
+struct cell* extend_env(struct cell* sym, struct cell* val, struct cell* env)
 {
-	top_env->cdr = make_cons(make_cons(sym, val), top_env->cdr);
+	*(env) = *(make_cons(make_cons(sym, val), make_cons(env->car, env->cdr)));
 	return val;
 }
 
@@ -86,17 +86,16 @@ struct cell* progn(struct cell* exps, struct cell* env)
 {
 	if(exps == nil) return nil;
 
-	struct cell* result;
-
 	for(;;)
 	{
+		struct cell* result;
 		result = eval(exps->car, env);
 		if(exps->cdr == nil) return result;
 		exps = exps->cdr;
 	}
 }
 
-struct cell* apply(struct cell* proc, struct cell* vals)
+struct cell* apply(struct cell* proc, struct cell* vals, struct cell* env)
 {
 	struct cell* temp = nil;
 	if(proc->type == PRIMOP)
@@ -105,7 +104,7 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 	}
 	else if(proc->type == PROC)
 	{
-		temp = progn(proc->cdr, multiple_extend(proc->env, proc->car, vals));
+		temp = progn(proc->cdr, multiple_extend(env, proc->car, vals));
 	}
 	else
 	{
@@ -187,9 +186,9 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 	if(exp->car == s_begin) return progn(exp->cdr, env);
 	if(exp->car == s_lambda) return make_proc(exp->cdr->car, exp->cdr->cdr, env);
 	if(exp->car == quote) return exp->cdr->car;
-	if(exp->car == s_define) return(extend_top(exp->cdr->car, eval(exp->cdr->cdr->car, env)));
+	if(exp->car == s_define) return(extend_env(exp->cdr->car, eval(exp->cdr->cdr->car, env), env));
 	if(exp->car == s_setb) return process_setb(exp, env);
-	return apply(eval(exp->car, env), evlis(exp->cdr, env));
+	return apply(eval(exp->car, env), evlis(exp->cdr, env), env);
 }
 
 
