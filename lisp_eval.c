@@ -104,7 +104,7 @@ struct cell* apply(struct cell* proc, struct cell* vals, struct cell* env)
 	}
 	else if(proc->type == PROC)
 	{
-		env = make_cons(env->car, env->cdr);
+		env = make_cons(proc->env->car, proc->env->cdr);
 		temp = progn(proc->cdr, multiple_extend(env, proc->car, vals));
 	}
 	else
@@ -189,6 +189,14 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 	if(exp->car == quote) return exp->cdr->car;
 	if(exp->car == s_define) return(extend_env(exp->cdr->car, eval(exp->cdr->cdr->car, env), env));
 	if(exp->car == s_setb) return process_setb(exp, env);
+	if(exp->car == s_let)
+	{
+		for(struct cell* lets = exp->cdr->car; lets != nil; lets = lets->cdr)
+		{
+			env = make_cons(make_cons(lets->car->car, eval(lets->car->cdr->car, env)), env);
+		}
+		return progn(exp->cdr->cdr, env);
+	}
 	return apply(eval(exp->car, env), evlis(exp->cdr, env), env);
 }
 
@@ -466,6 +474,7 @@ void init_sl3()
 	s_define = make_sym("define");
 	s_setb = make_sym("set!");
 	s_begin = make_sym("begin");
+	s_let = make_sym("let");
 
 	/* Globals of interest */
 	all_symbols = make_cons(nil, nil);
@@ -480,6 +489,7 @@ void init_sl3()
 	spinup(s_define, s_define);
 	spinup(s_setb, s_setb);
 	spinup(s_begin, s_begin);
+	spinup(s_let, s_let);
 
 	/* Add Primitive Specials */
 	spinup(make_sym("+"), make_prim(prim_sum));
