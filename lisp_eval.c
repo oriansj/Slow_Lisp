@@ -95,7 +95,7 @@ struct cell* progn(struct cell* exps, struct cell* env)
 	}
 }
 
-struct cell* apply(struct cell* proc, struct cell* vals, struct cell* env)
+struct cell* apply(struct cell* proc, struct cell* vals)
 {
 	struct cell* temp = nil;
 	if(proc->type == PRIMOP)
@@ -104,7 +104,7 @@ struct cell* apply(struct cell* proc, struct cell* vals, struct cell* env)
 	}
 	else if(proc->type == PROC)
 	{
-		env = make_cons(proc->env->car, proc->env->cdr);
+		struct cell* env = make_cons(proc->env->car, proc->env->cdr);
 		temp = progn(proc->cdr, multiple_extend(env, proc->car, vals));
 	}
 	else
@@ -197,7 +197,7 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 		}
 		return progn(exp->cdr->cdr, env);
 	}
-	return apply(eval(exp->car, env), evlis(exp->cdr, env), env);
+	return apply(eval(exp->car, env), evlis(exp->cdr, env));
 }
 
 
