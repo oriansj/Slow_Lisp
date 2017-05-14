@@ -59,7 +59,8 @@ struct cell* multiple_extend(struct cell* env, struct cell* syms, struct cell* v
 
 struct cell* extend_env(struct cell* sym, struct cell* val, struct cell* env)
 {
-	*(env) = *(make_cons(make_cons(sym, val), make_cons(env->car, env->cdr)));
+	env->cdr = make_cons(env->car, env->cdr);
+	env->car = make_cons(sym, val);
 	return val;
 }
 
