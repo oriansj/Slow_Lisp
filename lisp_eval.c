@@ -104,6 +104,7 @@ struct cell* apply(struct cell* proc, struct cell* vals, struct cell* env)
 	}
 	else if(proc->type == PROC)
 	{
+		env = make_cons(env->car, env->cdr);
 		temp = progn(proc->cdr, multiple_extend(env, proc->car, vals));
 	}
 	else
