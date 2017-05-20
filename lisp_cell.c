@@ -143,13 +143,18 @@ void unmark_cells(struct cell* list, struct cell* stop, int count)
 		if(list == stop) count = count + 1;
 		list->type = list->type & ~MARKED;
 
-		if((list->type & CONS)|| list->type & PROC )
+		if(list->type & PROC)
 		{
 			unmark_cells(list->car, stop, count);
 			if(NULL != list->env)
 			{
 				unmark_cells(list->env, stop, count);
 			}
+		}
+
+		if(list->type & CONS)
+		{
+			unmark_cells(list->car, stop, count);
 		}
 	}
 }
