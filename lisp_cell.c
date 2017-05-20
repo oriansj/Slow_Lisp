@@ -134,14 +134,22 @@ void mark_all_cells()
 	}
 }
 
-void unmark_cells(struct cell* list)
+void unmark_cells(struct cell* list, struct cell* stop, int count)
 {
+	if(count > 1) return;
+
 	for(; NULL != list; list = list->cdr)
 	{
+		if(list == stop) count = count + 1;
 		list->type = list->type & ~MARKED;
+
 		if((list->type & CONS)|| list->type & PROC )
 		{
-			unmark_cells(list->car);
+			unmark_cells(list->car, stop, count);
+			if(NULL != list->env)
+			{
+				unmark_cells(list->env, stop, count);
+			}
 		}
 	}
 }
@@ -149,8 +157,8 @@ void unmark_cells(struct cell* list)
 void garbage_collect()
 {
 	mark_all_cells();
-	unmark_cells(all_symbols);
-	unmark_cells(top_env);
+	unmark_cells(all_symbols, all_symbols, 0);
+	unmark_cells(top_env, top_env, 0);
 	reclaim_marked();
 	update_remaining();
 	compact(all_symbols);
