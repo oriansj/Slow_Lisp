@@ -181,6 +181,15 @@ struct cell* process_setb(struct cell* exp, struct cell* env)
 	return newval;
 }
 
+struct cell* process_let(struct cell* exp, struct cell* env)
+{
+	for(struct cell* lets = exp->cdr->car; lets != nil; lets = lets->cdr)
+	{
+		env = make_cons(make_cons(lets->car->car, eval(lets->car->cdr->car, env)), env);
+	}
+	return progn(exp->cdr->cdr, env);
+}
+
 struct cell* process_cons(struct cell* exp, struct cell* env)
 {
 	if(exp->car == s_if) return process_if(exp, env);
@@ -190,14 +199,7 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 	if(exp->car == quote) return exp->cdr->car;
 	if(exp->car == s_define) return(extend_env(exp->cdr->car, eval(exp->cdr->cdr->car, env), env));
 	if(exp->car == s_setb) return process_setb(exp, env);
-	if(exp->car == s_let)
-	{
-		for(struct cell* lets = exp->cdr->car; lets != nil; lets = lets->cdr)
-		{
-			env = make_cons(make_cons(lets->car->car, eval(lets->car->cdr->car, env)), env);
-		}
-		return progn(exp->cdr->cdr, env);
-	}
+	if(exp->car == s_let) return process_let(exp, env);
 	return apply(eval(exp->car, env), evlis(exp->cdr, env));
 }
 
