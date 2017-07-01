@@ -401,7 +401,7 @@ struct cell* prim_output(struct cell* args, FILE* out)
 		{
 			fprintf(out, "%d", args->car->value);
 		}
-		else if(ASCII == args->car->type)
+		else if(CHAR == args->car->type)
 		{
 			fprintf(out, "%c", args->car->value);
 		}
@@ -452,14 +452,37 @@ struct cell* prim_freecell(struct cell* args)
 	return make_int(cells_remaining());
 }
 
-struct cell* prim_ascii(struct cell* args)
+struct cell* prim_integer_to_char(struct cell* args)
 {
 	struct cell* temp;
 	for(temp = args; nil != temp; temp = temp->cdr)
 	{
 		if(INT == temp->car->type)
 		{
-			temp->car->type = ASCII;
+			temp->car->type = CHAR;
+		}
+
+		if(CONS == temp->car->type)
+		{
+			prim_integer_to_char(temp->car);
+		}
+	}
+	return args;
+}
+
+struct cell* prim_char_to_integer(struct cell* args)
+{
+	struct cell* temp;
+	for(temp = args; nil != temp; temp = temp->cdr)
+	{
+		if(CHAR == temp->car->type)
+		{
+			temp->car->type = INT;
+		}
+
+		if(CONS == temp->car->type)
+		{
+			prim_char_to_integer(temp->car);
 		}
 	}
 	return args;
@@ -537,7 +560,8 @@ void init_sl3()
 	spinup(make_sym("display"), make_prim(prim_display));
 	spinup(make_sym("write"), make_prim(prim_write));
 	spinup(make_sym("free_mem"), make_prim(prim_freecell));
-	spinup(make_sym("ascii!"), make_prim(prim_ascii));
+	spinup(make_sym("integer->char"), make_prim(prim_integer_to_char));
+	spinup(make_sym("char->integer"), make_prim(prim_char_to_integer));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
 	spinup(make_sym("string=?"), make_prim(prim_stringeq));

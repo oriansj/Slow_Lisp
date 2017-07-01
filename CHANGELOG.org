@@ -33,11 +33,15 @@ Added Test0 to demonstrate support for quote
 Added Test1 to demonstrate support for list, cons, car, cdr, null? and cond
 Added test target to make
 Added support for raw strings
+Added recursive support to integer->char
+Added char->integer
 
 ** Changed
 Makefile is modified to follow bin standard
 Renamed resulting binary to slow_lisp to prevent namespace conflicts in bin
 Enhanced basic tests
+Converted ASCII type to CHAR
+Converted ASCII! to integer->char
 
 ** Fixed
 makefile now does proper cleanup
