@@ -70,6 +70,18 @@ struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 		{
 			done = true;
 		}
+		else if(34 == c)
+		{
+			store[i] = c;
+			i = i + 1;
+			while(34 != fullstring[i])
+			{
+				store[i] = fullstring[i];
+				i = i + 1;
+			}
+			i = i + 1;
+			done = true;
+		}
 		else
 		{
 			if((' ' == c) || ('\t' == c) || ('\n' == c) | ('\r' == c))
@@ -135,6 +147,15 @@ struct cell* atom(struct cell* a)
 		a->string = a->string + 1;
 		return make_cons(quote, make_cons(a, nil));
 	}
+
+	/* Check for strings */
+	if(34 == a->string[0])
+	{
+		a->type = STRING;
+		a->string = a->string + 1;
+		return a;
+	}
+
 	/* Check for integer */
 	if(is_integer(a->string))
 	{
@@ -239,6 +260,19 @@ uint32_t Readline(FILE* source_file, char* temp)
 				c = fgetc(source_file);
 			}
 			goto Line_complete;
+		}
+		else if(34 == c)
+		{ /* Deal with strings */
+			store[i] = (char)c;
+			i = i + 1;
+			c = fgetc(source_file);
+			while(34 != c)
+			{
+				store[i] = (char)c;
+				i = i + 1;
+				c = fgetc(source_file);
+			}
+			store[i] = (char)c;
 		}
 		else if((0 == depth) && ((10 == c) || (13 == c) || (32 == c) || (9 == c)))
 		{

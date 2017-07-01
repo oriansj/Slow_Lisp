@@ -30,7 +30,8 @@ enum otype
 	CONS = (1 << 4),
 	PROC = (1 << 5),
 	PRIMOP = (1 << 6),
-	ASCII = (1 << 7)
+	ASCII = (1 << 7),
+	STRING = (1 << 8)
 };
 
 typedef struct cell* (*Operation)(struct cell *);
