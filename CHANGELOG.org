@@ -35,6 +35,7 @@ Added test target to make
 Added support for raw strings
 Added recursive support to integer->char
 Added char->integer
+Added string->list
 
 ** Changed
 Makefile is modified to follow bin standard

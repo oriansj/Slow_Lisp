@@ -488,6 +488,28 @@ struct cell* prim_char_to_integer(struct cell* args)
 	return args;
 }
 
+struct cell* make_char(int a);
+struct cell* string_to_list(char* string)
+{
+	if(NULL == string) return nil;
+	if(0 == string[0]) return nil;
+	struct cell* result = make_char(string[0]);
+	struct cell* tail = string_to_list(string + 1);
+	return make_cons(result, tail);
+}
+
+struct cell* prim_string_to_list(struct cell* args)
+{
+	if(nil == args) return nil;
+
+	if(STRING == args->car->type)
+	{
+		return string_to_list(args->car->string);
+	}
+	return nil;
+}
+
+
 struct cell* prim_halt(struct cell* args)
 {
 	/* Cleanup */
@@ -564,6 +586,7 @@ void init_sl3()
 	spinup(make_sym("char->integer"), make_prim(prim_char_to_integer));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
+	spinup(make_sym("string->list"), make_prim(prim_string_to_list));
 	spinup(make_sym("string=?"), make_prim(prim_stringeq));
 	spinup(make_sym("cons"), make_prim(prim_cons));
 	spinup(make_sym("car"), make_prim(prim_car));
