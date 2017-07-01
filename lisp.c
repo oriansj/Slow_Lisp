@@ -16,7 +16,9 @@
  */
 
 #include "lisp.h"
+#include <getopt.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* Prototypes */
 struct cell* eval(struct cell* exp, struct cell* env);
@@ -27,22 +29,81 @@ void writeobj(FILE *ofp, struct cell* op);
 void garbage_init();
 void garbage_collect();
 
-/*** Main Driver ***/
-int main()
+/* Read Eval Print Loop*/
+bool REPL(FILE* in, FILE *out)
 {
+	int read;
+	char* message = calloc(1024, sizeof(char));
+	read = Readline(in, message);
+	if(0 == read)
+	{
+		return true;
+	}
+	struct cell* temp = parse(message, read);
+	temp = eval(temp, top_env);
+	writeobj(out, temp);
+	printf("\n");
+	return false;
+}
+
+
+/*** Main Driver ***/
+int main(int argc, char **argv)
+{
+	/* Our most important initializations */
 	garbage_init();
 	init_sl3();
+	bool Reached_EOF;
 	output = fopen("tape_02", "w");
-	for(;;)
+
+	static struct option long_options[] = {
+		{"file", required_argument, 0, 'f'},
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+
+	int c;
+	int option_index = 0;
+	while ((c = getopt_long(argc, argv, "f:h:v", long_options, &option_index)) != -1)
+	{
+		switch(c)
+		{
+			case 0: break;
+			case 'h':
+			{
+				fprintf(stderr, "Usage: %s -f FILENAME1 {-f FILENAME2}\n", argv[0]);
+				exit(EXIT_SUCCESS);
+			}
+			case 'f':
+			{
+				FILE* source_file = fopen(optarg, "r");
+				Reached_EOF = false;
+				while(!Reached_EOF)
+				{
+					garbage_collect();
+					Reached_EOF = REPL(source_file, stdout);
+				}
+				break;
+			}
+			case 'v':
+			{
+				fprintf(stdout, "Slow_Lisp 0.1\n");
+				exit(EXIT_SUCCESS);
+			}
+			default:
+			{
+				fprintf(stderr, "Unknown option\n");
+				exit(EXIT_FAILURE);
+			}
+		}
+	}
+
+	Reached_EOF = false;
+	while(!Reached_EOF)
 	{
 		garbage_collect();
-		int read;
-		char* message = calloc(1024, sizeof(char));
-		read = Readline(stdin, message);
-		struct cell* temp = parse(message, read);
-		temp = eval(temp, top_env);
-		writeobj(stdout, temp);
-		printf("\n");
+		Reached_EOF = REPL(stdin, stdout);
 	}
 	fclose(output);
 	return 0;

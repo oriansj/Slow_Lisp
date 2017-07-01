@@ -467,7 +467,11 @@ struct cell* prim_ascii(struct cell* args)
 
 struct cell* prim_halt(struct cell* args)
 {
+	/* Cleanup */
+	free(args);
 	fclose(output);
+
+	/* Actual important part */
 	exit(EXIT_SUCCESS);
 }
 

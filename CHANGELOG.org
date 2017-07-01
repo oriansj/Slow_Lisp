@@ -17,6 +17,9 @@
 * Current
 ** Added
 Added inital changelog
+Added version message
+Added Help message
+Added support for multiple definition filesq
 
 ** Changed
 Makefile is modified to follow bin standard
@@ -25,6 +28,7 @@ Makefile is modified to follow bin standard
 makefile now does proper cleanup
 
 ** Removed
+Removed C warning about unused args in prim_halt
 
 * 0.0 - 2017-07-01
 ** Added

@@ -227,9 +227,9 @@ uint32_t Readline(FILE* source_file, char* temp)
 	for(i = 0; i < max_string; i = i + 1)
 	{
 		c = fgetc(source_file);
-		if(-1 == c)
+		if((-1 == c) || (4 == c))
 		{
-			exit(EXIT_SUCCESS);
+			return i;
 		}
 		else if(59 == c)
 		{
