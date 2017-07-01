@@ -16,6 +16,16 @@
 
 * Current
 ** Added
+Added inital changelog
+
+** Changed
+
+** Fixed
+
+** Removed
+
+* 0.0 - 2017-07-01
+** Added
 Inital important of Stage0 lisp, high level prototype
 
 ** Changed
