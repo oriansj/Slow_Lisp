@@ -393,6 +393,17 @@ struct cell* prim_listp(struct cell* args)
 	return nil;
 }
 
+struct cell* prim_charp(struct cell* args)
+{
+	if(nil == args) return nil;
+
+	if(CHAR == args->car->type)
+	{
+		return tee;
+	}
+	return nil;
+}
+
 struct cell* prim_output(struct cell* args, FILE* out)
 {
 	for(; nil != args; args = args->cdr)
@@ -584,6 +595,7 @@ void init_sl3()
 	spinup(make_sym("free_mem"), make_prim(prim_freecell));
 	spinup(make_sym("integer->char"), make_prim(prim_integer_to_char));
 	spinup(make_sym("char->integer"), make_prim(prim_char_to_integer));
+	spinup(make_sym("char?"), make_prim(prim_charp));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
 	spinup(make_sym("string->list"), make_prim(prim_string_to_list));
