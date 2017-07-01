@@ -19,7 +19,8 @@
 Added inital changelog
 Added version message
 Added Help message
-Added support for multiple definition filesq
+Added support for multiple definition files
+Added Test0 to demonstrate support for quote
 
 ** Changed
 Makefile is modified to follow bin standard

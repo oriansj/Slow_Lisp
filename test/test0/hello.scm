@@ -1,0 +1,2 @@
+(quote (Hello, Mescc!))
+(HALT)
