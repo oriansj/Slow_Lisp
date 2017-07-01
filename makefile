@@ -26,3 +26,19 @@ results:
 
 Coverage-cleanup:
 	rm -f *.gc{da,no,ov}
+
+
+# tests
+test: test0-result test1-result | results
+	sha256sum -c test/test.answers
+
+test0-result: results slow_lisp
+	test/test0/hello.sh
+
+test1-result: results slow_lisp
+	test/test1/hello.sh
+
+# Generate test answers
+.PHONY: Generate-test-answers
+Generate-test-answers:
+	sha256sum test/results/* >| test/test.answers
