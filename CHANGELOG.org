@@ -19,8 +19,10 @@
 Added inital changelog
 
 ** Changed
+Makefile is modified to follow bin standard
 
 ** Fixed
+makefile now does proper cleanup
 
 ** Removed
 

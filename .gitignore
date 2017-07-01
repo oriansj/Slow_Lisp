@@ -1,10 +1,16 @@
-# The compiled lisp
-lisp
-# temp files
-*.swp
-*.tmp
+# Ignore build directory
+bin/
+
+# Ignore Temp directory
+temp/
+
+# Ignore test result directory
+test/results/
+
+# Ignore temp and special files
+*.tst
 *.qst
+*.tmp
 
 # Where you write output
 tape_02
-
