@@ -21,6 +21,7 @@ Added version message
 Added Help message
 Added support for multiple definition files
 Added Test0 to demonstrate support for quote
+Added Test1 to demonstrate support for list, cons, car, cdr, null? and cond
 
 ** Changed
 Makefile is modified to follow bin standard
