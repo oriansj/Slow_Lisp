@@ -23,6 +23,7 @@ Added support for multiple definition filesq
 
 ** Changed
 Makefile is modified to follow bin standard
+Renamed resulting binary to slow_lisp to prevent namespace conflicts in bin
 
 ** Fixed
 makefile now does proper cleanup
