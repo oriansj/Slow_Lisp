@@ -37,6 +37,7 @@ Added recursive support to integer->char
 Added char->integer
 Added string->list
 Added char?
+Added string?
 
 ** Changed
 Makefile is modified to follow bin standard
