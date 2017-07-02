@@ -465,38 +465,25 @@ struct cell* prim_freecell(struct cell* args)
 
 struct cell* prim_integer_to_char(struct cell* args)
 {
-	struct cell* temp;
-	for(temp = args; nil != temp; temp = temp->cdr)
-	{
-		if(INT == temp->car->type)
-		{
-			temp->car->type = CHAR;
-		}
+	if(nil == args) return nil;
 
-		if(CONS == temp->car->type)
-		{
-			prim_integer_to_char(temp->car);
-		}
+	if(INT == args->car->type)
+	{
+		args->car->type = CHAR;
 	}
-	return args;
+
+	return args->car;
 }
 
 struct cell* prim_char_to_integer(struct cell* args)
 {
-	struct cell* temp;
-	for(temp = args; nil != temp; temp = temp->cdr)
-	{
-		if(CHAR == temp->car->type)
-		{
-			temp->car->type = INT;
-		}
+	if(nil == args) return nil;
 
-		if(CONS == temp->car->type)
-		{
-			prim_char_to_integer(temp->car);
-		}
+	if(CHAR == args->car->type)
+	{
+		args->car->type = INT;
 	}
-	return args;
+	return args->car;
 }
 
 struct cell* make_char(int a);

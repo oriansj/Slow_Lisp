@@ -44,6 +44,7 @@ Renamed resulting binary to slow_lisp to prevent namespace conflicts in bin
 Enhanced basic tests
 Converted ASCII type to CHAR
 Converted ASCII! to integer->char
+Made integer->char match guile
 
 ** Fixed
 makefile now does proper cleanup
