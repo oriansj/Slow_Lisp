@@ -216,6 +216,14 @@ struct cell* make_char(int a)
 	return c;
 }
 
+struct cell* make_string(char* a)
+{
+	struct cell* c = pop_cons();
+	c->type = STRING;
+	c->string = a;
+	return c;
+}
+
 struct cell* make_sym(char* name)
 {
 	struct cell* c = pop_cons();

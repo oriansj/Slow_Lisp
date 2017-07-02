@@ -53,6 +53,11 @@ void writeobj(FILE *ofp, struct cell* op)
 		case PRIMOP: fprintf(ofp, "#<PRIMOP>"); break;
 		case PROC: fprintf(ofp, "#<PROC>"); break;
 		case CHAR: fprintf(ofp, "%c", op->value); break;
-		default: exit(1);
+		case STRING: fprintf(ofp, "%s", op->string); break;
+		default:
+		{
+			fprintf(stderr, "Type %d is unknown\nPrint aborting hard\n", op->type);
+			exit(EXIT_FAILURE);
+		}
 	}
 }
