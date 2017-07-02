@@ -38,6 +38,7 @@ Added char->integer
 Added string->list
 Added char?
 Added string?
+Added list->string
 
 ** Changed
 Makefile is modified to follow bin standard

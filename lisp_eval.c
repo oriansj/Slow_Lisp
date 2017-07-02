@@ -518,6 +518,32 @@ struct cell* prim_string_to_list(struct cell* args)
 	return nil;
 }
 
+struct cell* make_string(char* a);
+int list_to_string(struct cell* args, char* string, int index)
+{
+	for(struct cell* i = args; nil != i; i = i->cdr)
+	{
+		if(CHAR == i->car->type)
+		{
+			string[index] = i->car->value;
+			index = index + 1;
+		}
+		if(CONS == i->car->type)
+		{
+			index = list_to_string(i->car, string, index);
+		}
+	}
+	return index;
+}
+
+struct cell* prim_list_to_string(struct cell* args)
+{
+	if(nil == args) return nil;
+	char* string = calloc(4096, sizeof(char));
+	int index = 0;
+	list_to_string(args, string, index);
+	return make_string(string);
+}
 
 struct cell* prim_halt(struct cell* args)
 {
@@ -596,6 +622,7 @@ void init_sl3()
 	spinup(make_sym("char?"), make_prim(prim_charp));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
+	spinup(make_sym("list->string"), make_prim(prim_list_to_string));
 	spinup(make_sym("string->list"), make_prim(prim_string_to_list));
 	spinup(make_sym("string?"), make_prim(prim_stringp));
 	spinup(make_sym("string=?"), make_prim(prim_stringeq));
