@@ -39,6 +39,7 @@ Added string->list
 Added char?
 Added string?
 Added list->string
+Added initial lisp ascension library
 
 ** Changed
 Makefile is modified to follow bin standard
