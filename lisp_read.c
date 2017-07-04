@@ -27,32 +27,11 @@ struct cell* make_sym(char* name);
 struct cell* intern(char *name);
 struct cell* findsym(char *name);
 
-struct cell* append_Cell(struct cell* head, struct cell* tail)
-{
-	if(NULL == head)
-	{
-		return tail;
-	}
-
-	if(NULL == head->cdr)
-	{
-		head->cdr = tail;
-		return head;
-	}
-
-	append_Cell(head->cdr, tail);
-	return head;
-}
-
 /****************************************************************
- * def tokenize(s):                                             *
  *      "Convert a string into a list of tokens."               *
- *      return s.replace('(',' ( ').replace(')',' ) ').split()  *
  ****************************************************************/
-
 struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 {
-	int32_t c;
 	int32_t i = 0;
 	bool done = false;
 	if((0 >= size) || (0 == fullstring[0]))
@@ -64,7 +43,7 @@ struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 
 	do
 	{
-		c = fullstring[i];
+		int32_t c = fullstring[i];
 		if((i > size) || (max_string <= i))
 		{
 			done = true;
@@ -98,7 +77,9 @@ struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 
 	if(i > 1)
 	{
-		head = append_Cell(head, make_sym(store));
+		struct cell* temp = make_sym(store);
+		temp->cdr = head;
+		head = temp;
 	}
 	else
 	{
@@ -129,15 +110,12 @@ bool is_integer(char* a)
 
 
 /********************************************************************
- * def atom(token):                                                 *
- *     "Numbers become numbers; every other token is a symbol."     *
- *     try: return int(token)                                       *
- *     except ValueError:                                           *
- *         try: return float(token)                                 *
- *         except ValueError:                                       *
- *             return Symbol(token)                                 *
+ *     Numbers become numbers                                       *
+ *     Strings become strings                                       *
+ *     Functions become functions                                   *
+ *     quoted things become quoted                                  *
+ *     Everything is treated like a symbol                          *
  ********************************************************************/
-
 struct cell* atom(struct cell* a)
 {
 	/* Check for quotes */
@@ -176,23 +154,8 @@ struct cell* atom(struct cell* a)
 }
 
 /****************************************************************
- * def read_from_tokens(tokens):                                *
  *     "Read an expression from a sequence of tokens."          *
- *     if len(tokens) == 0:                                     *
- *         raise SyntaxError('unexpected EOF while reading')    *
- *     token = tokens.pop(0)                                    *
- *     if '(' == token:                                         *
- *         L = []                                               *
- *         while tokens[0] != ')':                              *
- *             L.append(read_from_tokens(tokens))               *
- *         tokens.pop(0) # pop off ')'                          *
- *         return L                                             *
- *     elif ')' == token:                                       *
- *         raise SyntaxError('unexpected )')                    *
- *     else:                                                    *
- *         return atom(token)                                   *
  ****************************************************************/
-
 struct cell* readlist();
 struct cell* readobj()
 {
@@ -222,11 +185,24 @@ struct cell* readlist()
 }
 
 /****************************************************
- * def parse(program):                              *
- *     "Read a Scheme expression from a string."    *
- *     return read_from_tokens(tokenize(program))   *
+ *     Put list of tokens in correct order          *
  ****************************************************/
+struct cell* reverse_list(struct cell* head)
+{
+	struct cell* root = NULL;
+	while(NULL != head)
+	{
+		struct cell* next = head->cdr;
+		head->cdr = root;
+		root = head;
+		head = next;
+	}
+	return root;
+}
 
+/****************************************************
+ *     "Read a Scheme expression from a string."    *
+ ****************************************************/
 struct cell* parse(char* program, int32_t size)
 {
 	token_stack = tokenize(NULL, program, size);
@@ -234,9 +210,13 @@ struct cell* parse(char* program, int32_t size)
 	{
 		return nil;
 	}
+	token_stack = reverse_list(token_stack);
 	return readobj();
 }
 
+/****************************************************
+ * Do the heavy lifting of reading an s-expreesion  *
+ ****************************************************/
 uint32_t Readline(FILE* source_file, char* temp)
 {
 	char store[max_string + 2] = {0};

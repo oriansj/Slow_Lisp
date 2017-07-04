@@ -41,6 +41,7 @@ Added string?
 Added list->string
 Added initial lisp ascension library
 Extending lisp ascension library with reverse, fold-right and a couple char functions
+Added cell list reversing primitive
 
 ** Changed
 Makefile is modified to follow bin standard
@@ -56,6 +57,7 @@ Harmonized max_string size that doesn't hit glibc malloc bug
 
 ** Removed
 Removed C warning about unused args in prim_halt
+Removed need for append cell
 
 * 0.0 - 2017-07-01
 ** Added
