@@ -33,7 +33,7 @@ void garbage_collect();
 bool REPL(FILE* in, FILE *out)
 {
 	int read;
-	char* message = calloc(1024, sizeof(char));
+	char* message = calloc(max_string + 2, sizeof(char));
 	read = Readline(in, message);
 	if(0 == read)
 	{

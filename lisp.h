@@ -50,8 +50,7 @@ typedef struct cell
 	struct cell* env;
 } cell;
 
-#define MAXLEN 256
-
+#define max_string 4094
 
 struct cell* make_cons(struct cell* a, struct cell* b);
 

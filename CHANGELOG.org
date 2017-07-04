@@ -52,6 +52,7 @@ Made integer->char match guile
 
 ** Fixed
 makefile now does proper cleanup
+Harmonized max_string size that doesn't hit glibc malloc bug
 
 ** Removed
 Removed C warning about unused args in prim_halt

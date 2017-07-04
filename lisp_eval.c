@@ -539,7 +539,7 @@ int list_to_string(struct cell* args, char* string, int index)
 struct cell* prim_list_to_string(struct cell* args)
 {
 	if(nil == args) return nil;
-	char* string = calloc(4096, sizeof(char));
+	char* string = calloc(max_string + 2, sizeof(char));
 	int index = 0;
 	list_to_string(args, string, index);
 	return make_string(string);

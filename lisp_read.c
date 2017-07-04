@@ -18,7 +18,6 @@
 #include "lisp.h"
 #include <stdbool.h>
 #include <stdint.h>
-#define max_string 255
 
 FILE* source_file;
 bool Reached_EOF;
