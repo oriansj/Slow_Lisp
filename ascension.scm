@@ -61,3 +61,23 @@
 		(cond
 			((string=? (caar y) x) (car y))
 			(#t (assoc x (cdr y))))))
+
+; Reverse
+(define reving
+	(lambda (list result)
+		(cond
+			((null? list) result)
+			((list? list) (reving (cdr list) (cons (car list) result)))
+			(#t (cons list result)))))
+(define reverse (lambda (list) (reving list nil)))
+
+; Fold-right
+(define fold-right
+	(lambda (f a l)
+		(if (null? l)
+			a
+			(f (car l) (fold-right f a (cdr l))))))
+
+; char functions
+(define numeric-char? (lambda (ch) (if (and (char? ch) (<= 48 ch 57)) #t nil)))
+(define digit->number (lambda (d) (if (and (char? d) (<= 48 d 57)) (- d 48) nil)))
