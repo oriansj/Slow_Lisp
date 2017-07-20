@@ -16,12 +16,23 @@
 
 * Current
 ** Added
+Added number?
+Added string-append
+Added Get-index
+Added map
+Added filter
+Added length
+Added string-length
+Added eq?
+Added fold-left
 
 ** Changed
+Changed reverse to not depend on alternate functions
 
 ** Fixed
 
 ** Removed
+Removed reving as it is only needed inside of reverse
 
 * 0.1 - 2017-07-01
 ** Added
