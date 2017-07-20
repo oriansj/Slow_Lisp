@@ -16,6 +16,15 @@
 
 * Current
 ** Added
+
+** Changed
+
+** Fixed
+
+** Removed
+
+* 0.2 - 2017-07-19
+** Added
 Added number?
 Added string-append
 Added Get-index
