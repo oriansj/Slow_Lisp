@@ -205,6 +205,11 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 
 
 /*** Primitives ***/
+struct cell* prim_apply(struct cell* args)
+{
+	return apply(args->car, args->cdr->car);
+}
+
 struct cell* nullp(struct cell* args)
 {
 	if(nil == args->car) return tee;
@@ -415,6 +420,17 @@ struct cell* prim_numberp(struct cell* args)
 	return nil;
 }
 
+struct cell* prim_symbolp(struct cell* args)
+{
+	if(nil == args) return nil;
+
+	if(SYM == args->car->type)
+	{
+		return tee;
+	}
+	return nil;
+}
+
 struct cell* prim_stringp(struct cell* args)
 {
 	if(nil == args) return nil;
@@ -611,6 +627,7 @@ void init_sl3()
 	spinup(s_let, s_let);
 
 	/* Add Primitive Specials */
+	spinup(make_sym("apply"), make_prim(prim_apply));
 	spinup(make_sym("null?"), make_prim(nullp));
 	spinup(make_sym("+"), make_prim(prim_sum));
 	spinup(make_sym("-"), make_prim(prim_sub));
@@ -632,6 +649,7 @@ void init_sl3()
 	spinup(make_sym("char->integer"), make_prim(prim_char_to_integer));
 	spinup(make_sym("char?"), make_prim(prim_charp));
 	spinup(make_sym("number?"), make_prim(prim_numberp));
+	spinup(make_sym("symbol?"), make_prim(prim_symbolp));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
 	spinup(make_sym("list->string"), make_prim(prim_list_to_string));

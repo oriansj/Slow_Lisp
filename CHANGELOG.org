@@ -25,6 +25,8 @@ Added length
 Added string-length
 Added eq?
 Added fold-left
+Added symbol?
+Exported apply functionality
 
 ** Changed
 Changed reverse to not depend on alternate functions
