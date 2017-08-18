@@ -24,6 +24,7 @@ Altered order of arguments in list_to_string function to simplify assembly imple
 Now hides all new definitions loading
 
 ** Fixed
+Fixed bug in line comments
 
 ** Removed
 

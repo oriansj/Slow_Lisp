@@ -226,6 +226,7 @@ uint32_t Readline(FILE* source_file, char* temp)
 
 	for(i = 0; i < max_string; i = i + 1)
 	{
+restart_comment:
 		c = fgetc(source_file);
 		if((-1 == c) || (4 == c))
 		{
@@ -238,7 +239,7 @@ uint32_t Readline(FILE* source_file, char* temp)
 			{
 				c = fgetc(source_file);
 			}
-			goto Line_complete;
+			goto restart_comment;
 		}
 		else if(34 == c)
 		{ /* Deal with strings */
