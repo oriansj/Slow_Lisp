@@ -157,7 +157,7 @@ struct cell* process_sym(struct cell* exp, struct cell* env)
 	struct cell* tmp = assoc(exp, env);
 	if(tmp == nil)
 	{
-		fprintf(stderr,"Unbound symbol\n");
+		fprintf(stderr,"Unbound symbol:%s\n", exp->string);
 		exit(EXIT_FAILURE);
 	}
 	return tmp->cdr;

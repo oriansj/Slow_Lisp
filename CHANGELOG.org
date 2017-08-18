@@ -22,6 +22,7 @@ Added ability to turn on and off echo to make bootup quieter
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
 Now hides all new definitions loading
+Display string of unbound symbol to aid in debugging
 
 ** Fixed
 Fixed bug in line comments
