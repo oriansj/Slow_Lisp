@@ -546,7 +546,7 @@ struct cell* prim_string_to_list(struct cell* args)
 }
 
 struct cell* make_string(char* a);
-int list_to_string(struct cell* args, char* string, int index)
+int list_to_string(int index, char* string, struct cell* args)
 {
 	for(struct cell* i = args; nil != i; i = i->cdr)
 	{
@@ -557,7 +557,7 @@ int list_to_string(struct cell* args, char* string, int index)
 		}
 		if(CONS == i->car->type)
 		{
-			index = list_to_string(i->car, string, index);
+			index = list_to_string(index, string, i->car);
 		}
 	}
 	return index;
@@ -567,8 +567,7 @@ struct cell* prim_list_to_string(struct cell* args)
 {
 	if(nil == args) return nil;
 	char* string = calloc(max_string + 2, sizeof(char));
-	int index = 0;
-	list_to_string(args, string, index);
+	list_to_string(0, string, args);
 	return make_string(string);
 }
 
