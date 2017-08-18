@@ -14,6 +14,9 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with stage0.  If not, see <http://www.gnu.org/licenses/>.
 
+;; Reduce loading noise
+(echo nil)
+
 ;; 2 level car/cdr
 (define caar (lambda (x) (car (car x))))
 (define cadr (lambda (x) (car (cdr x))))
@@ -127,3 +130,10 @@
 			((string? a) (if (string? b) (string=? a b) nil))
 			((char? a) (if (char? b) (= a b) nil))
 			(#t (= a b)))))
+
+;; Restore echo
+(echo #t)
+
+;; Inform the user of successful load
+"⚙ ascension has successfully loaded ⚙"
+

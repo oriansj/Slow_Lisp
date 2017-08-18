@@ -16,8 +16,12 @@
 
 * Current
 ** Added
+Added a greeting to the standard ascension.scm
+Added ability to turn on and off echo to make bootup quieter
 
 ** Changed
+Altered order of arguments in list_to_string function to simplify assembly implementation
+Now hides all new definitions loading
 
 ** Fixed
 

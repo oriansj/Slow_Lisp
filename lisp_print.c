@@ -19,6 +19,8 @@
 
 void writeobj(FILE *ofp, struct cell* op)
 {
+	if(!echo) return;
+
 	switch(op->type)
 	{
 		case INT: fprintf(ofp, "%d", op->value); break;

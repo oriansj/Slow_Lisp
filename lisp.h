@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 enum otype
 {
@@ -68,3 +69,4 @@ struct cell *s_cond;
 struct cell *s_begin;
 struct cell *s_let;
 FILE* output;
+bool echo;

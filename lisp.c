@@ -18,7 +18,6 @@
 #include "lisp.h"
 #include <getopt.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 /* Prototypes */
 struct cell* eval(struct cell* exp, struct cell* env);
@@ -42,7 +41,7 @@ bool REPL(FILE* in, FILE *out)
 	struct cell* temp = parse(message, read);
 	temp = eval(temp, top_env);
 	writeobj(out, temp);
-	printf("\n");
+	if(echo) printf("\n");
 	return false;
 }
 
@@ -54,6 +53,7 @@ int main(int argc, char **argv)
 	garbage_init();
 	init_sl3();
 	bool Reached_EOF;
+	echo = true;
 	output = fopen("tape_02", "w");
 
 	static struct option long_options[] = {

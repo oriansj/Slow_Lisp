@@ -571,6 +571,18 @@ struct cell* prim_list_to_string(struct cell* args)
 	return make_string(string);
 }
 
+struct cell* prim_echo(struct cell* args)
+{
+	if(nil == args) return nil;
+	if(nil == args->car) echo = false;
+	if(tee == args->car)
+	{
+		echo = true;
+		return make_string("");
+	}
+	return args->car;
+}
+
 struct cell* prim_halt(struct cell* args)
 {
 	/* Cleanup */
@@ -658,5 +670,6 @@ void init_sl3()
 	spinup(make_sym("cons"), make_prim(prim_cons));
 	spinup(make_sym("car"), make_prim(prim_car));
 	spinup(make_sym("cdr"), make_prim(prim_cdr));
+	spinup(make_sym("echo"), make_prim(prim_echo));
 	spinup(make_sym("HALT"), make_prim(prim_halt));
 }
