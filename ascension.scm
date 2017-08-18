@@ -63,7 +63,7 @@
 (define assoc
 	(lambda (x y)
 		(cond
-			((string=? (caar y) x) (car y))
+			((eq? (caar y) x) (car y))
 			(#t (assoc x (cdr y))))))
 
 ; Get-index
@@ -130,6 +130,34 @@
 			((string? a) (if (string? b) (string=? a b) nil))
 			((char? a) (if (char? b) (= a b) nil))
 			(#t (= a b)))))
+
+;; Add chars
+(define #\a (integer->char 97))
+(define #\b (integer->char 98))
+(define #\c (integer->char 99))
+(define #\d (integer->char 100))
+(define #\e (integer->char 101))
+(define #\f (integer->char 102))
+(define #\g (integer->char 103))
+(define #\h (integer->char 104))
+(define #\i (integer->char 105))
+(define #\j (integer->char 106))
+(define #\k (integer->char 107))
+(define #\l (integer->char 108))
+(define #\m (integer->char 109))
+(define #\n (integer->char 110))
+(define #\o (integer->char 111))
+(define #\p (integer->char 112))
+(define #\q (integer->char 113))
+(define #\r (integer->char 114))
+(define #\s (integer->char 115))
+(define #\t (integer->char 116))
+(define #\u (integer->char 117))
+(define #\v (integer->char 118))
+(define #\w (integer->char 119))
+(define #\x (integer->char 120))
+(define #\y (integer->char 121))
+(define #\z (integer->char 122))
 
 ;; Restore echo
 (echo #t)

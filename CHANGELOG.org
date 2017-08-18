@@ -18,11 +18,13 @@
 ** Added
 Added a greeting to the standard ascension.scm
 Added ability to turn on and off echo to make bootup quieter
+Added #\a through #\z
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
 Now hides all new definitions loading
 Display string of unbound symbol to aid in debugging
+Made assoc more flexible
 
 ** Fixed
 Fixed bug in line comments
