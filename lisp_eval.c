@@ -141,15 +141,10 @@ struct cell* eval(struct cell* exp, struct cell* env)
 
 	switch(exp->type)
 	{
-		case INT: return exp;
 		case SYM: return process_sym(exp, env);
 		case CONS: return process_cons(exp, env);
-		case PRIMOP: return exp;
-		case PROC: return exp;
 		default: return exp;
 	}
-	/* Not reached */
-	return exp;
 }
 
 struct cell* process_sym(struct cell* exp, struct cell* env)

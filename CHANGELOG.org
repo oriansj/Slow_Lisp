@@ -19,6 +19,7 @@
 Added a greeting to the standard ascension.scm
 Added ability to turn on and off echo to make bootup quieter
 Added #\a through #\z
+Added get-type and set-type! primitives to allow easy addition of new types
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
@@ -30,6 +31,8 @@ Made assoc more flexible
 Fixed bug in line comments
 
 ** Removed
+Removed multiple type functions from Slow_lisp binary and into the ascension library
+Removed redundent evaluation paths
 
 * 0.2 - 2017-07-19
 ** Added
