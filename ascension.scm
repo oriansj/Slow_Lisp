@@ -17,6 +17,18 @@
 ;; Reduce loading noise
 (echo nil)
 
+;; Add some essential primitives
+(define number? (lambda (a) (if (= 4 (get-type a)) #t nil)))
+(define symbol? (lambda (a) (if (= 8 (get-type a)) #t nil)))
+(define list? (lambda (a) (if (= 16 (get-type a)) #t nil)))
+(define procedure? (lambda (a) (if (= 32 (get-type a)) #t nil)))
+(define primitive? (lambda (a) (if (= 64 (get-type a)) #t nil)))
+(define char? (lambda (a) (if (= 128 (get-type a)) #t nil)))
+(define string? (lambda (a) (if (= 256 (get-type a)) #t nil)))
+
+(define integer->char (lambda (a) (if (number? a) (set-type! a 128) a)))
+(define char->integer (lambda (a) (if (char? a) (set-type! a 4) a)))
+
 ;; 2 level car/cdr
 (define caar (lambda (x) (car (car x))))
 (define cadr (lambda (x) (car (cdr x))))

@@ -398,48 +398,18 @@ struct cell* prim_listp(struct cell* args)
 	return nil;
 }
 
-struct cell* prim_charp(struct cell* args)
+struct cell* prim_get_type(struct cell* args)
 {
 	if(nil == args) return nil;
-
-	if(CHAR == args->car->type)
-	{
-		return tee;
-	}
-	return nil;
+	return make_int(args->car->type);
 }
 
-struct cell* prim_numberp(struct cell* args)
+struct cell* prim_set_type(struct cell* args)
 {
 	if(nil == args) return nil;
 
-	if(INT == args->car->type)
-	{
-		return tee;
-	}
-	return nil;
-}
-
-struct cell* prim_symbolp(struct cell* args)
-{
-	if(nil == args) return nil;
-
-	if(SYM == args->car->type)
-	{
-		return tee;
-	}
-	return nil;
-}
-
-struct cell* prim_stringp(struct cell* args)
-{
-	if(nil == args) return nil;
-
-	if(STRING == args->car->type)
-	{
-		return tee;
-	}
-	return nil;
+	args->car->type = args->cdr->car->value;
+	return args->car;
 }
 
 struct cell* prim_output(struct cell* args, FILE* out)
@@ -499,29 +469,6 @@ struct cell* prim_freecell(struct cell* args)
 		printf("Remaining Cells: ");
 	}
 	return make_int(cells_remaining());
-}
-
-struct cell* prim_integer_to_char(struct cell* args)
-{
-	if(nil == args) return nil;
-
-	if(INT == args->car->type)
-	{
-		args->car->type = CHAR;
-	}
-
-	return args->car;
-}
-
-struct cell* prim_char_to_integer(struct cell* args)
-{
-	if(nil == args) return nil;
-
-	if(CHAR == args->car->type)
-	{
-		args->car->type = INT;
-	}
-	return args->car;
 }
 
 struct cell* make_char(int a);
@@ -656,16 +603,12 @@ void init_sl3()
 	spinup(make_sym("display"), make_prim(prim_display));
 	spinup(make_sym("write"), make_prim(prim_write));
 	spinup(make_sym("free_mem"), make_prim(prim_freecell));
-	spinup(make_sym("integer->char"), make_prim(prim_integer_to_char));
-	spinup(make_sym("char->integer"), make_prim(prim_char_to_integer));
-	spinup(make_sym("char?"), make_prim(prim_charp));
-	spinup(make_sym("number?"), make_prim(prim_numberp));
-	spinup(make_sym("symbol?"), make_prim(prim_symbolp));
+	spinup(make_sym("get-type"), make_prim(prim_get_type));
+	spinup(make_sym("set-type!"), make_prim(prim_set_type));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
 	spinup(make_sym("list->string"), make_prim(prim_list_to_string));
 	spinup(make_sym("string->list"), make_prim(prim_string_to_list));
-	spinup(make_sym("string?"), make_prim(prim_stringp));
 	spinup(make_sym("string=?"), make_prim(prim_stringeq));
 	spinup(make_sym("cons"), make_prim(prim_cons));
 	spinup(make_sym("car"), make_prim(prim_car));
