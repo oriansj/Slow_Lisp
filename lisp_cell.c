@@ -200,6 +200,16 @@ struct cell* pop_cons()
 	return i;
 }
 
+struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env)
+{
+	struct cell* c = pop_cons();
+	c->type = type;
+	c->car = a;
+	c->cdr = b;
+	c->env = env;
+	return c;
+}
+
 struct cell* make_int(int a)
 {
 	struct cell* c = pop_cons();
@@ -234,31 +244,12 @@ struct cell* make_sym(char* name)
 
 struct cell* make_cons(struct cell* a, struct cell* b)
 {
-	struct cell* c = pop_cons();
-	c->type = CONS;
-	c->car = a;
-	c->cdr = b;
-	return c;
+	return make_cell(CONS, a, b, nil);
 }
 
 struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env)
 {
-	struct cell* c = pop_cons();
-	c->type = PROC;
-	c->car = a;
-	c->cdr = b;
-	c->env = env;
-	return c;
-}
-
-struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env)
-{
-	struct cell* c = pop_cons();
-	c->type =type;
-	c->car = a;
-	c->cdr = b;
-	c->env = env;
-	return c;
+	return make_cell(PROC, a, b, env);
 }
 
 struct cell* make_prim(void* fun)
