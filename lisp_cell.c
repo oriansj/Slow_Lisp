@@ -251,6 +251,16 @@ struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env)
 	return c;
 }
 
+struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env)
+{
+	struct cell* c = pop_cons();
+	c->type =type;
+	c->car = a;
+	c->cdr = b;
+	c->env = env;
+	return c;
+}
+
 struct cell* make_prim(void* fun)
 {
 	struct cell* c = pop_cons();

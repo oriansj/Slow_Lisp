@@ -399,12 +399,11 @@ struct cell* prim_get_type(struct cell* args)
 	return make_int(args->car->type);
 }
 
+struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env);
 struct cell* prim_set_type(struct cell* args)
 {
 	if(nil == args) return nil;
-
-	args->car->type = args->cdr->car->value;
-	return args->car;
+	return make_cell(args->cdr->car->value, args->car->car, args->car->cdr, args->car->env);
 }
 
 struct cell* prim_output(struct cell* args, FILE* out)

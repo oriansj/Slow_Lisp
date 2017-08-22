@@ -26,6 +26,7 @@ Altered order of arguments in list_to_string function to simplify assembly imple
 Now hides all new definitions loading
 Display string of unbound symbol to aid in debugging
 Made assoc more flexible
+Made set-type be a copying rather than overwriting operation
 
 ** Fixed
 Fixed bug in line comments
