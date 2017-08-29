@@ -27,9 +27,11 @@ Now hides all new definitions loading
 Display string of unbound symbol to aid in debugging
 Made assoc more flexible
 Made set-type be a copying rather than overwriting operation
+Gave assoc better names and let it return nil when none are found
 
 ** Fixed
 Fixed bug in line comments
+Fixed bug in eq? such that it behaves correctly with strings
 
 ** Removed
 Removed multiple type functions from Slow_lisp binary and into the ascension library

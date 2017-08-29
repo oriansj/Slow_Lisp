@@ -73,10 +73,11 @@
 
 ; Assoc
 (define assoc
-	(lambda (x y)
+	(lambda (sym alist)
 		(cond
-			((eq? (caar y) x) (car y))
-			(#t (assoc x (cdr y))))))
+			((null? alist) nil)
+			((eq? (caar alist) sym) (car alist))
+			(#t (assoc sym (cdr alist))))))
 
 ; Get-index
 (define get-index
@@ -139,8 +140,7 @@
 (define eq?
 	(lambda (a b)
 		(cond
-			((string? a) (if (string? b) (string=? a b) nil))
-			((char? a) (if (char? b) (= a b) nil))
+			((and (string? a) (string? b)) (string=? a b))
 			(#t (= a b)))))
 
 ;; Add chars
