@@ -79,6 +79,14 @@
 			((eq? (caar alist) sym) (car alist))
 			(#t (assoc sym (cdr alist))))))
 
+; pair-up lists
+(define pair-up
+	(lambda (vars vals)
+		(cond
+			((null? vars) (if (null? vals) nil (error "pair-up TMA")))
+			((null? vals) (error "pair-up TFA"))
+			(#t (cons (cons (car vars) (car vals)) (pair-up (cdr vars) (cdr vals)))))))
+
 ; Get-index
 (define get-index
 	(lambda (number list)
@@ -170,6 +178,17 @@
 (define #\x (integer->char 120))
 (define #\y (integer->char 121))
 (define #\z (integer->char 122))
+
+;; Add special chars
+(define #\nul (integer->char 0))
+(define #\eot (integer->char 4))
+(define #\ht (integer->char 9))
+(define #\lf (integer->char 10))
+(define #\cr (integer->char 13))
+(define #\sp (integer->char 32))
+
+; Ensure Error states HALT after displaying a useful error message
+(define error (lambda (message) (begin (display message) (display #\lf) (HALT))))
 
 ;; Restore echo
 (echo #t)

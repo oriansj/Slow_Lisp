@@ -20,6 +20,9 @@ Added a greeting to the standard ascension.scm
 Added ability to turn on and off echo to make bootup quieter
 Added #\a through #\z
 Added get-type and set-type! primitives to allow easy addition of new types
+Added list pair-up function
+Added basic error function to halt in weird edge cases
+Added some special chars
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
