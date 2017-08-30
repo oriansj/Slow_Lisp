@@ -23,6 +23,8 @@ Added get-type and set-type! primitives to allow easy addition of new types
 Added list pair-up function
 Added basic error function to halt in weird edge cases
 Added some special chars
+Added env-bind
+added env-lookup
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
@@ -31,6 +33,7 @@ Display string of unbound symbol to aid in debugging
 Made assoc more flexible
 Made set-type be a copying rather than overwriting operation
 Gave assoc better names and let it return nil when none are found
+Broke out non-standard functions into lisp.scm
 
 ** Fixed
 Fixed bug in line comments

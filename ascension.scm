@@ -79,14 +79,6 @@
 			((eq? (caar alist) sym) (car alist))
 			(#t (assoc sym (cdr alist))))))
 
-; pair-up lists
-(define pair-up
-	(lambda (vars vals)
-		(cond
-			((null? vars) (if (null? vals) nil (error "pair-up TMA")))
-			((null? vals) (error "pair-up TFA"))
-			(#t (cons (cons (car vars) (car vals)) (pair-up (cdr vars) (cdr vals)))))))
-
 ; Get-index
 (define get-index
 	(lambda (number list)
@@ -195,4 +187,3 @@
 
 ;; Inform the user of successful load
 "⚙ ascension has successfully loaded ⚙"
-
