@@ -68,5 +68,6 @@ struct cell *s_setb;
 struct cell *s_cond;
 struct cell *s_begin;
 struct cell *s_let;
+struct cell *s_while;
 FILE* output;
 bool echo;

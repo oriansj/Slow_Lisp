@@ -132,6 +132,20 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 	return evcond(exp->cdr, env);
 }
 
+struct cell* evwhile(struct cell* exp, struct cell* env)
+{
+	if(nil == exp) return nil;
+	struct cell* conditional = eval(exp->cdr->car, env);
+
+	while(tee == conditional)
+	{
+		eval(exp->cdr->cdr->car, env);
+		conditional = eval(exp->cdr->car, env);
+	}
+
+	return conditional;
+}
+
 struct cell* process_sym(struct cell* exp, struct cell* env);
 struct cell* process_cons(struct cell* exp, struct cell* env);
 
@@ -195,6 +209,7 @@ struct cell* process_cons(struct cell* exp, struct cell* env)
 	if(exp->car == s_define) return(extend_env(exp->cdr->car, eval(exp->cdr->cdr->car, env), env));
 	if(exp->car == s_setb) return process_setb(exp, env);
 	if(exp->car == s_let) return process_let(exp, env);
+	if(exp->car == s_while) return evwhile(exp, env);
 	return apply(eval(exp->car, env), evlis(exp->cdr, env));
 }
 
@@ -562,6 +577,7 @@ void init_sl3()
 	s_setb = make_sym("set!");
 	s_begin = make_sym("begin");
 	s_let = make_sym("let");
+	s_while = make_sym("while");
 
 	/* Globals of interest */
 	all_symbols = make_cons(nil, nil);
@@ -577,6 +593,7 @@ void init_sl3()
 	spinup(s_setb, s_setb);
 	spinup(s_begin, s_begin);
 	spinup(s_let, s_let);
+	spinup(s_while, s_while);
 
 	/* Add Primitive Specials */
 	spinup(make_sym("apply"), make_prim(prim_apply));
