@@ -70,6 +70,7 @@ struct cell *s_begin;
 struct cell *s_let;
 struct cell *s_while;
 struct cell *current;
+FILE* input;
 FILE* output;
 bool echo;
 int64_t left_to_take;

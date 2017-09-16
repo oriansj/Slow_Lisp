@@ -26,6 +26,7 @@ Added some special chars
 Added env-bind
 added env-lookup
 Added while primitive
+Added read-byte primitive
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation

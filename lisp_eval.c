@@ -540,6 +540,12 @@ struct cell* prim_echo(struct cell* args)
 	return args->car;
 }
 
+struct cell* prim_read_byte(struct cell* args)
+{
+	if(nil == args) return make_char(fgetc(input));
+	return nil;
+}
+
 struct cell* prim_halt(struct cell* args)
 {
 	/* Cleanup */
@@ -626,5 +632,6 @@ void init_sl3()
 	spinup(make_sym("car"), make_prim(prim_car));
 	spinup(make_sym("cdr"), make_prim(prim_cdr));
 	spinup(make_sym("echo"), make_prim(prim_echo));
+	spinup(make_sym("read-byte"), make_prim(prim_read_byte));
 	spinup(make_sym("HALT"), make_prim(prim_halt));
 }
