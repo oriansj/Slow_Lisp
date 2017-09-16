@@ -27,6 +27,7 @@ Added env-bind
 added env-lookup
 Added while primitive
 Added read-byte primitive
+Added support for Hex numbers being read in provided they are prefixed by 0x
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation

@@ -137,7 +137,8 @@ struct cell* atom(struct cell* a)
 	if(is_integer(a->string))
 	{
 		a->type = INT;
-		a->value = atoi(a->string);
+		char *ptr;
+		a->value = strtol(a->string, &ptr, 0);
 		return a;
 	}
 
