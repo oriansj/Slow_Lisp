@@ -35,6 +35,7 @@ Made assoc more flexible
 Made set-type be a copying rather than overwriting operation
 Gave assoc better names and let it return nil when none are found
 Broke out non-standard functions into lisp.scm
+Changed the behavior of (while #t (expression)) to allow for infinite loops
 
 ** Fixed
 Fixed bug in line comments
@@ -43,6 +44,7 @@ Fixed bug in eq? such that it behaves correctly with strings
 ** Removed
 Removed multiple type functions from Slow_lisp binary and into the ascension library
 Removed redundent evaluation paths
+Removed redundent function calls in regards to the number of free cells
 
 * 0.2 - 2017-07-19
 ** Added

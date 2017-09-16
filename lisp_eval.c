@@ -132,6 +132,7 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 	return evcond(exp->cdr, env);
 }
 
+void garbage_collect();
 struct cell* evwhile(struct cell* exp, struct cell* env)
 {
 	if(nil == exp) return nil;
@@ -141,6 +142,7 @@ struct cell* evwhile(struct cell* exp, struct cell* env)
 	{
 		eval(exp->cdr->cdr->car, env);
 		conditional = eval(exp->cdr->car, env);
+		if((tee == exp->cdr->car) && (left_to_take < 1000)) garbage_collect();
 	}
 
 	return conditional;
@@ -470,14 +472,13 @@ struct cell* prim_write(struct cell* args)
 	return prim_output(args, output);
 }
 
-int64_t cells_remaining();
 struct cell* prim_freecell(struct cell* args)
 {
 	if(nil == args)
 	{
 		printf("Remaining Cells: ");
 	}
-	return make_int(cells_remaining());
+	return make_int(left_to_take);
 }
 
 struct cell* make_char(int a);

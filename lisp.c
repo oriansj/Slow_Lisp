@@ -39,8 +39,10 @@ bool REPL(FILE* in, FILE *out)
 		return true;
 	}
 	struct cell* temp = parse(message, read);
+	current = temp;
 	temp = eval(temp, top_env);
 	writeobj(out, temp);
+	current = nil;
 	if(echo) printf("\n");
 	return false;
 }

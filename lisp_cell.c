@@ -18,12 +18,6 @@
 #include "lisp.h"
 
 struct cell *free_cells, *gc_block_start, *top_allocated;
-int64_t left_to_take;
-
-int64_t cells_remaining()
-{
-	return left_to_take;
-}
 
 void update_remaining()
 {
@@ -162,6 +156,7 @@ void unmark_cells(struct cell* list, struct cell* stop, int count)
 void garbage_collect()
 {
 	mark_all_cells();
+	unmark_cells(current, current, 0);
 	unmark_cells(all_symbols, all_symbols, 0);
 	unmark_cells(top_env, top_env, 0);
 	reclaim_marked();
