@@ -464,12 +464,12 @@ struct cell* prim_stringeq(struct cell* args)
 
 struct cell* prim_display(struct cell* args)
 {
-	return prim_output(args, stdout);
+	return prim_output(args, console_output);
 }
 
 struct cell* prim_write(struct cell* args)
 {
-	return prim_output(args, output);
+	return prim_output(args, file_output);
 }
 
 struct cell* prim_freecell(struct cell* args)
@@ -550,7 +550,7 @@ struct cell* prim_halt(struct cell* args)
 {
 	/* Cleanup */
 	free(args);
-	fclose(output);
+	fclose(file_output);
 
 	/* Actual important part */
 	exit(EXIT_SUCCESS);

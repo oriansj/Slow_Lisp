@@ -166,9 +166,8 @@ void garbage_collect()
 	top_allocated = NULL;
 }
 
-void garbage_init()
+void garbage_init(int number_of_Cells)
 {
-	int number_of_Cells = 1000000;
 	gc_block_start = calloc(number_of_Cells + 1, sizeof(cell));
 	top_allocated = gc_block_start + number_of_Cells;
 	free_cells = NULL;

@@ -21,6 +21,7 @@
 	(lambda (vars vals)
 		(cond
 			((null? vars) (if (null? vals) nil (error "pair-up TMA")))
+			((symbol? vars) (cons (cons vars vals) nil))
 			((null? vals) (error "pair-up TFA"))
 			(#t (cons (cons (car vars) (car vals)) (pair-up (cdr vars) (cdr vals)))))))
 

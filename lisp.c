@@ -19,13 +19,19 @@
 #include <getopt.h>
 #include <stdint.h>
 
+struct file_list
+{
+	struct file_list* next;
+	FILE* file;
+};
+
 /* Prototypes */
 struct cell* eval(struct cell* exp, struct cell* env);
 void init_sl3();
 uint32_t Readline(FILE* source_file, char* temp);
 struct cell* parse(char* program, int32_t size);
 void writeobj(FILE *ofp, struct cell* op);
-void garbage_init();
+void garbage_init(int number_of_Cells);
 void garbage_collect();
 
 /* Read Eval Print Loop*/
@@ -44,49 +50,72 @@ bool REPL(FILE* in, FILE *out)
 	temp = eval(temp, top_env);
 	writeobj(out, temp);
 	current = nil;
-	if(echo) printf("\n");
+	if(echo) fprintf(out, "\n");
 	return false;
 }
 
+void recursively_evaluate(struct file_list* a)
+{
+	if(NULL == a) return;
+	recursively_evaluate(a->next);
+	bool Reached_EOF = false;
+	while(!Reached_EOF)
+	{
+		garbage_collect();
+		Reached_EOF = REPL(a->file, console_output);
+	}
+}
 
 /*** Main Driver ***/
 int main(int argc, char **argv)
 {
-	/* Our most important initializations */
-	garbage_init();
-	init_sl3();
-	bool Reached_EOF;
-	echo = true;
-	output = fopen("tape_02", "w");
-
+	int number_of_cells = 1000000;
+	file_output = fopen("tape_02", "w");
+	console_output = stdout;
+	struct file_list* essential;
 	static struct option long_options[] = {
+		{"console", required_argument, 0, 'c'},
 		{"file", required_argument, 0, 'f'},
 		{"help", no_argument, 0, 'h'},
+		{"memory", required_argument, 0, 'm'},
+		{"output", required_argument, 0, 'o'},
 		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}
 	};
 
 	int c;
 	int option_index = 0;
-	while ((c = getopt_long(argc, argv, "f:h:v", long_options, &option_index)) != -1)
+	while ((c = getopt_long(argc, argv, "c:f:h:m:o:v", long_options, &option_index)) != -1)
 	{
 		switch(c)
 		{
 			case 0: break;
+			case 'c':
+			{
+				console_output =  fopen(optarg, "w");
+				break;
+			}
+			case 'f':
+			{
+				struct file_list* new = calloc(1, sizeof(struct file_list));
+				new->file = fopen(optarg, "r");
+				new->next = essential;
+				essential = new;
+				break;
+			}
 			case 'h':
 			{
 				fprintf(stderr, "Usage: %s -f FILENAME1 {-f FILENAME2}\n", argv[0]);
 				exit(EXIT_SUCCESS);
 			}
-			case 'f':
+			case 'm':
 			{
-				FILE* source_file = fopen(optarg, "r");
-				Reached_EOF = false;
-				while(!Reached_EOF)
-				{
-					garbage_collect();
-					Reached_EOF = REPL(source_file, stdout);
-				}
+//				number_of_cells = strtol(optarg, NULL,  0);
+				break;
+			}
+			case 'o':
+			{
+				file_output =  fopen(optarg, "w");
 				break;
 			}
 			case 'v':
@@ -102,12 +131,20 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/* Our most important initializations */
+	garbage_init(number_of_cells);
+	init_sl3();
+	bool Reached_EOF;
+	echo = true;
+
+	recursively_evaluate(essential);
+
 	Reached_EOF = false;
 	while(!Reached_EOF)
 	{
 		garbage_collect();
 		Reached_EOF = REPL(stdin, stdout);
 	}
-	fclose(output);
+	fclose(file_output);
 	return 0;
 }
