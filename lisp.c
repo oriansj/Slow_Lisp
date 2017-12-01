@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 			}
 			case 'm':
 			{
-				number_of_cells = strtol(optarg, NULL,  0);
+//				number_of_cells = strtol(optarg, NULL,  0);
 				break;
 			}
 			case 'o':
