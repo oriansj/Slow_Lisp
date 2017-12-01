@@ -31,7 +31,7 @@ void init_sl3();
 uint32_t Readline(FILE* source_file, char* temp);
 struct cell* parse(char* program, int32_t size);
 void writeobj(FILE *ofp, struct cell* op);
-void garbage_init(int number_of_Cells);
+void garbage_init(int number_of_cells);
 void garbage_collect();
 
 /* Read Eval Print Loop*/
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 			}
 			case 'm':
 			{
-//				number_of_cells = strtol(optarg, NULL,  0);
+				number_of_cells = strtol(optarg, NULL,  0);
 				break;
 			}
 			case 'o':
