@@ -70,9 +70,9 @@ void recursively_evaluate(struct file_list* a)
 int main(int argc, char **argv)
 {
 	int number_of_cells = 1000000;
-	file_output = fopen("tape_02", "w");
+	file_output = fopen("/dev/null", "w");
 	console_output = stdout;
-	struct file_list* essential;
+	struct file_list* essential = NULL;
 	static struct option long_options[] = {
 		{"console", required_argument, 0, 'c'},
 		{"file", required_argument, 0, 'f'},
@@ -93,12 +93,22 @@ int main(int argc, char **argv)
 			case 'c':
 			{
 				console_output =  fopen(optarg, "w");
+				if(NULL == console_output)
+				{
+					fprintf(stderr, "The file: %s does not appear writable\n", optarg);
+					exit(EXIT_FAILURE);
+				}
 				break;
 			}
 			case 'f':
 			{
 				struct file_list* new = calloc(1, sizeof(struct file_list));
 				new->file = fopen(optarg, "r");
+				if(NULL == new->file)
+				{
+					fprintf(stderr, "The file: %s does not appear readable\n", optarg);
+					exit(EXIT_FAILURE);
+				}
 				new->next = essential;
 				essential = new;
 				break;
@@ -110,12 +120,17 @@ int main(int argc, char **argv)
 			}
 			case 'm':
 			{
-//				number_of_cells = strtol(optarg, NULL,  0);
+				number_of_cells = strtol(optarg, NULL,  0);
 				break;
 			}
 			case 'o':
 			{
 				file_output =  fopen(optarg, "w");
+				if(NULL == file_output)
+				{
+					fprintf(stderr, "The file: %s does not appear writable\n", optarg);
+					exit(EXIT_FAILURE);
+				}
 				break;
 			}
 			case 'v':

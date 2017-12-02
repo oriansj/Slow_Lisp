@@ -28,6 +28,9 @@ added env-lookup
 Added while primitive
 Added read-byte primitive
 Added support for Hex numbers being read in provided they are prefixed by 0x
+Added ability to select file output
+Added ability to select console output
+Added ability to change memory allocation
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
@@ -42,6 +45,7 @@ Changed the behavior of (while #t (expression)) to allow for infinite loops
 ** Fixed
 Fixed bug in line comments
 Fixed bug in eq? such that it behaves correctly with strings
+Program now behaves correctly when given bad file names
 
 ** Removed
 Removed multiple type functions from Slow_lisp binary and into the ascension library
