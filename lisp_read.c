@@ -159,7 +159,7 @@ struct cell* atom(struct cell* a)
 struct cell* readlist();
 struct cell* readobj()
 {
-	cell* head = token_stack;
+	struct cell* head = token_stack;
 	token_stack = head->cdr;
 	head->cdr = NULL;
 	if (! strncmp("(", head->string, max_string))
@@ -172,14 +172,14 @@ struct cell* readobj()
 
 struct cell* readlist()
 {
-	cell* head = token_stack;
+	struct cell* head = token_stack;
 	if (! strncmp(")", head->string, max_string))
 	{
 		token_stack = head->cdr;
 		return nil;
 	}
 
-	cell* tmp = readobj();
+	struct cell* tmp = readobj();
 //	token_stack = head->cdr;
 	return make_cons(tmp,readlist());
 }

@@ -182,6 +182,8 @@
 ; Ensure Error states HALT after displaying a useful error message
 (define error (lambda (message) (begin (display message) (display #\lf) (HALT))))
 
+(define for-each (lambda (fn list) (if (null? list) nil (begin (fn (car list)) (for-each fn (cdr list))))))
+
 ;; Restore echo
 (echo #t)
 
