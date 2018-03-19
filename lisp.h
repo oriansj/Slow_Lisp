@@ -35,7 +35,7 @@ enum otype
 	STRING = (1 << 8)
 };
 
-typedef struct cell* (*Operation)(struct cell *);
+typedef struct cell* (Operation)(struct cell *);
 
 struct cell
 {
@@ -45,14 +45,10 @@ struct cell
 		struct cell* car;
 		int value;
 		char* string;
-		Operation function;
+		Operation* function;
 	};
 	struct cell* cdr;
-	union
-	{
-		struct cell* env;
-		char* token;
-	};
+	struct cell* env;
 };
 
 #define max_string 4094

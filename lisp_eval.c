@@ -476,7 +476,8 @@ struct cell* prim_freecell(struct cell* args)
 {
 	if(nil == args)
 	{
-		printf("Remaining Cells: ");
+		printf("Remaining Cells: %ld\n", left_to_take);
+		return nil;
 	}
 	return make_int(left_to_take);
 }
