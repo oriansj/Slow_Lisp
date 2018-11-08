@@ -16,8 +16,6 @@
  */
 
 #include "lisp.h"
-#include <getopt.h>
-#include <stdint.h>
 
 struct file_list
 {
@@ -28,37 +26,37 @@ struct file_list
 /* Prototypes */
 struct cell* eval(struct cell* exp, struct cell* env);
 void init_sl3();
-uint32_t Readline(FILE* source_file, char* temp);
-struct cell* parse(char* program, int32_t size);
+int Readline(FILE* source_file, char* temp);
+struct cell* parse(char* program, int size);
 void writeobj(FILE *ofp, struct cell* op);
 void garbage_init(int number_of_cells);
 void garbage_collect();
 
 /* Read Eval Print Loop*/
-bool REPL(FILE* in, FILE *out)
+int REPL(FILE* in, FILE *out)
 {
 	int read;
 	input = in;
-	char* message = calloc(max_string + 2, sizeof(char));
+	char* message = calloc(MAX_STRING + 2, sizeof(char));
 	read = Readline(in, message);
 	if(0 == read)
 	{
-		return true;
+		return TRUE;
 	}
 	struct cell* temp = parse(message, read);
 	current = temp;
 	temp = eval(temp, top_env);
 	writeobj(out, temp);
 	current = nil;
-	if(echo) fprintf(out, "\n");
-	return false;
+	if(echo) fputc('\n', out);
+	return FALSE;
 }
 
 void recursively_evaluate(struct file_list* a)
 {
 	if(NULL == a) return;
 	recursively_evaluate(a->next);
-	bool Reached_EOF = false;
+	int Reached_EOF = FALSE;
 	while(!Reached_EOF)
 	{
 		garbage_collect();
@@ -73,88 +71,86 @@ int main(int argc, char **argv)
 	file_output = fopen("/dev/null", "w");
 	console_output = stdout;
 	struct file_list* essential = NULL;
-	static struct option long_options[] = {
-		{"console", required_argument, 0, 'c'},
-		{"file", required_argument, 0, 'f'},
-		{"help", no_argument, 0, 'h'},
-		{"memory", required_argument, 0, 'm'},
-		{"output", required_argument, 0, 'o'},
-		{"version", no_argument, 0, 'v'},
-		{0, 0, 0, 0}
-	};
 
-	int c;
-	int option_index = 0;
-	while ((c = getopt_long(argc, argv, "c:f:h:m:o:v", long_options, &option_index)) != -1)
+	int i = 1;
+	while(i <= argc)
 	{
-		switch(c)
+		if(NULL == argv[i])
 		{
-			case 0: break;
-			case 'c':
+			i = i + 1;
+		}
+		else if(match(argv[i], "-c") || match(argv[i], "--console"))
+		{
+			console_output = fopen(argv[i + 1], "w");
+			if(NULL == console_output)
 			{
-				console_output =  fopen(optarg, "w");
-				if(NULL == console_output)
-				{
-					fprintf(stderr, "The file: %s does not appear writable\n", optarg);
-					exit(EXIT_FAILURE);
-				}
-				break;
-			}
-			case 'f':
-			{
-				struct file_list* new = calloc(1, sizeof(struct file_list));
-				new->file = fopen(optarg, "r");
-				if(NULL == new->file)
-				{
-					fprintf(stderr, "The file: %s does not appear readable\n", optarg);
-					exit(EXIT_FAILURE);
-				}
-				new->next = essential;
-				essential = new;
-				break;
-			}
-			case 'h':
-			{
-				fprintf(stderr, "Usage: %s -f FILENAME1 {-f FILENAME2}\n", argv[0]);
-				exit(EXIT_SUCCESS);
-			}
-			case 'm':
-			{
-				number_of_cells = strtol(optarg, NULL,  0);
-				break;
-			}
-			case 'o':
-			{
-				file_output =  fopen(optarg, "w");
-				if(NULL == file_output)
-				{
-					fprintf(stderr, "The file: %s does not appear writable\n", optarg);
-					exit(EXIT_FAILURE);
-				}
-				break;
-			}
-			case 'v':
-			{
-				fprintf(stdout, "Slow_Lisp 0.1\n");
-				exit(EXIT_SUCCESS);
-			}
-			default:
-			{
-				fprintf(stderr, "Unknown option\n");
+				file_print("The file: ", stderr);
+				file_print(argv[i + 1], stderr);
+				file_print(" does not appear writable\n", stderr);
 				exit(EXIT_FAILURE);
 			}
+			i = i + 2;
+		}
+		else if(match(argv[i], "-f") || match(argv[i], "--file"))
+		{
+			struct file_list* new = calloc(1, sizeof(struct file_list));
+			new->file = fopen(argv[i + 1], "r");
+			if(NULL == new->file)
+			{
+				file_print("The file: ", stderr);
+				file_print(argv[i + 1], stderr);
+				file_print(" does not appear readable\n", stderr);
+				exit(EXIT_FAILURE);
+			}
+			new->next = essential;
+			essential = new;
+			i = i + 2;
+		}
+		else if(match(argv[i], "-h") || match(argv[i], "--help"))
+		{
+			file_print("Usage: ", stdout);
+			file_print(argv[0], stdout);
+			file_print(" -f FILENAME1 {-f FILENAME2}\n", stdout);
+			exit(EXIT_SUCCESS);
+		}
+		else if(match(argv[i], "-m") || match(argv[i], "--memory"))
+		{
+			number_of_cells = numerate_string(argv[i + 1]);
+			i = i + 2;
+		}
+		else if(match(argv[i], "-o") || match(argv[i], "--output"))
+		{
+			file_output =  fopen(argv[i + 1], "w");
+			if(NULL == file_output)
+			{
+				file_print("The file: ", stderr);
+				file_print(argv[i + 1], stderr);
+				file_print(" does not appear writable\n", stderr);
+				exit(EXIT_FAILURE);
+			}
+			i = i + 2;
+		}
+		else if(match(argv[i], "-v") || match(argv[i], "--version"))
+		{
+			file_print("Slow_Lisp 0.1\n", stdout);
+			exit(EXIT_SUCCESS);
+		}
+		else
+		{
+			file_print("Unknown option\n", stderr);
+			exit(EXIT_FAILURE);
 		}
 	}
 
 	/* Our most important initializations */
 	garbage_init(number_of_cells);
 	init_sl3();
-	bool Reached_EOF;
-	echo = true;
+	int Reached_EOF;
+	echo = TRUE;
 
 	recursively_evaluate(essential);
 
-	Reached_EOF = false;
+	Reached_EOF = FALSE;
 	while(!Reached_EOF)
 	{
 		garbage_collect();

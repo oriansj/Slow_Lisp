@@ -17,11 +17,17 @@
 
 #include "lisp.h"
 
-struct cell *free_cells, *gc_block_start, *top_allocated;
+/* Deal with the fact GCC converts the 1 to the size of the structs being iterated over */
+#define CELL_SIZE 1
+//CONSTANT CELL_SIZE 16
+
+struct cell *free_cells;
+struct cell *gc_block_start;
+struct cell *top_allocated;
 
 void update_remaining()
 {
-	int64_t count = 0;
+	int count = 0;
 	struct cell* i = free_cells;
 	while(NULL != i)
 	{
@@ -51,7 +57,7 @@ struct cell* insert_ordered(struct cell* i, struct cell* list)
 void reclaim_marked()
 {
 	struct cell* i;
-	for(i= top_allocated; i >= gc_block_start ; i = i - 1)
+	for(i= top_allocated; i >= gc_block_start ; i = i - CELL_SIZE)
 	{
 		if(i->type & MARKED)
 		{
@@ -117,7 +123,7 @@ void compact(struct cell* list)
 void mark_all_cells()
 {
 	struct cell* i;
-	for(i= gc_block_start; i < top_allocated; i = i + 1)
+	for(i= gc_block_start; i < top_allocated; i = i + CELL_SIZE)
 	{
 		/* if not in the free list */
 		if(!(i->type & FREE))
@@ -179,7 +185,7 @@ struct cell* pop_cons()
 {
 	if(NULL == free_cells)
 	{
-		printf("OOOPS we ran out of cells");
+		file_print("OOOPS we ran out of cells", stderr);
 		exit(EXIT_FAILURE);
 	}
 	struct cell* i;

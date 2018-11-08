@@ -17,49 +17,61 @@
 
 #include "lisp.h"
 
-void writeobj(FILE *ofp, struct cell* op)
+void writeobj(FILE *output_file, struct cell* op)
 {
 	if(!echo) return;
 
-	switch(op->type)
+	if(INT == op->type)
 	{
-		case INT: fprintf(ofp, "%d", op->value); break;
-		case CONS:
+		file_print(numerate_number(op->value), output_file);
+	}
+	else if(CONS == op->type)
+	{
+		fputc('(', output_file);
+		do
 		{
-			fprintf(ofp, "(");
-			for(;;)
+			writeobj(output_file, op->car);
+			if(nil == op->cdr)
 			{
-				writeobj(ofp, op->car);
-				if(nil == op->cdr)
-				{
-					fprintf(ofp, ")");
-					break;
-				}
-				op = op->cdr;
-				if(op->type != CONS)
-				{
-					fprintf(ofp, " . ");
-					writeobj(ofp, op);
-					fprintf(ofp, ")");
-					break;
-				}
-				fprintf(ofp, " ");
+				fputc(')', output_file);
+				break;
 			}
-			break;
-		}
-		case SYM:
-		{
-			fprintf(ofp, "%s", op->string);
-			break;
-		}
-		case PRIMOP: fprintf(ofp, "#<PRIMOP>"); break;
-		case PROC: fprintf(ofp, "#<PROC>"); break;
-		case CHAR: fprintf(ofp, "%c", op->value); break;
-		case STRING: fprintf(ofp, "%s", op->string); break;
-		default:
-		{
-			fprintf(stderr, "Type %d is unknown\nPrint aborting hard\n", op->type);
-			exit(EXIT_FAILURE);
-		}
+			op = op->cdr;
+			if(op->type != CONS)
+			{
+				file_print(" . ", output_file);
+				writeobj(output_file, op);
+				fputc(')', output_file);
+				break;
+			}
+			fputc(' ', output_file);
+		} while(TRUE);
+	}
+	else if(SYM == op->type)
+	{
+		file_print(op->string, output_file);
+	}
+	else if(PRIMOP == op->type)
+	{
+		file_print("#<PRIMOP>", output_file);
+	}
+	else if(PROC == op->type)
+	{
+		file_print("#<PROC>", output_file);
+	}
+	else if(CHAR == op->type)
+	{
+		fputc(op->value, output_file);
+	}
+	else if(STRING == op->type)
+	{
+		file_print(op->string, output_file);
+	}
+	else
+	{
+		file_print("Type ", stderr);
+		file_print(numerate_number(op->type), stderr);
+		file_print(" is unknown\nPrint aborting hard\n", stderr);
+		exit(EXIT_FAILURE);
 	}
 }

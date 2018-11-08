@@ -23,7 +23,7 @@ struct cell* findsym(char *name)
 	struct cell* symlist;
 	for(symlist = all_symbols; nil != symlist; symlist = symlist->cdr)
 	{
-		if(!strcmp(name, symlist->car->string))
+		if(match(name, symlist->car->string))
 		{
 			return symlist;
 		}
@@ -87,13 +87,17 @@ struct cell* progn(struct cell* exps, struct cell* env)
 {
 	if(exps == nil) return nil;
 
-	for(;;)
-	{
-		struct cell* result;
-		result = eval(exps->car, env);
-		if(exps->cdr == nil) return result;
-		exps = exps->cdr;
-	}
+	struct cell* result;
+progn_reset:
+	result = eval(exps->car, env);
+	if(exps->cdr == nil) return result;
+	exps = exps->cdr;
+	goto progn_reset;
+}
+
+struct cell* exec_func(FUNCTION * func, struct cell* vals)
+{
+	return func(vals);
 }
 
 struct cell* apply(struct cell* proc, struct cell* vals)
@@ -101,7 +105,7 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 	struct cell* temp = nil;
 	if(proc->type == PRIMOP)
 	{
-		temp = (*(proc->function))(vals);
+		temp = exec_func(proc->function, vals);
 	}
 	else if(proc->type == PROC)
 	{
@@ -110,7 +114,7 @@ struct cell* apply(struct cell* proc, struct cell* vals)
 	}
 	else
 	{
-		fprintf(stderr, "Bad argument to apply\n");
+		file_print("Bad argument to apply\n", stderr);
 		exit(EXIT_FAILURE);
 	}
 	return temp;
@@ -154,13 +158,9 @@ struct cell* process_cons(struct cell* exp, struct cell* env);
 struct cell* eval(struct cell* exp, struct cell* env)
 {
 	if(exp == nil) return nil;
-
-	switch(exp->type)
-	{
-		case SYM: return process_sym(exp, env);
-		case CONS: return process_cons(exp, env);
-		default: return exp;
-	}
+	if(SYM == exp->type) return process_sym(exp, env);
+	if(CONS == exp->type) return process_cons(exp, env);
+	return exp;
 }
 
 struct cell* process_sym(struct cell* exp, struct cell* env)
@@ -168,7 +168,9 @@ struct cell* process_sym(struct cell* exp, struct cell* env)
 	struct cell* tmp = assoc(exp, env);
 	if(tmp == nil)
 	{
-		fprintf(stderr,"Unbound symbol:%s\n", exp->string);
+		file_print("Unbound symbol:", stderr);
+		file_print(exp->string, stderr);
+		fputc('\n', stderr);
 		exit(EXIT_FAILURE);
 	}
 	return tmp->cdr;
@@ -194,7 +196,8 @@ struct cell* process_setb(struct cell* exp, struct cell* env)
 
 struct cell* process_let(struct cell* exp, struct cell* env)
 {
-	for(struct cell* lets = exp->cdr->car; lets != nil; lets = lets->cdr)
+	struct cell* lets;
+	for(lets = exp->cdr->car; lets != nil; lets = lets->cdr)
 	{
 		env = make_cons(make_cons(lets->car->car, eval(lets->car->cdr->car, env)), env);
 	}
@@ -284,7 +287,7 @@ struct cell* prim_mod(struct cell* args)
 	int mod = args->car->value % args->cdr->car->value;
 	if(nil != args->cdr->cdr)
 	{
-		printf("wrong number of arguments to mod\n");
+		file_print("wrong number of arguments to mod\n", stderr);
 		exit(EXIT_FAILURE);
 	}
 	return make_int(mod);
@@ -429,11 +432,11 @@ struct cell* prim_output(struct cell* args, FILE* out)
 	{
 		if(INT == args->car->type)
 		{
-			fprintf(out, "%d", args->car->value);
+			file_print(numerate_number(args->car->value), out);
 		}
 		else if(CHAR == args->car->type)
 		{
-			fprintf(out, "%c", args->car->value);
+			fputc(args->car->value, out);
 		}
 		else if(CONS == args->car->type)
 		{
@@ -441,7 +444,7 @@ struct cell* prim_output(struct cell* args, FILE* out)
 		}
 		else
 		{
-			fprintf(out, "%s", args->car->string);
+			file_print(args->car->string, out);
 		}
 	}
 	return tee;
@@ -454,7 +457,7 @@ struct cell* prim_stringeq(struct cell* args)
 	char* temp = args->car->string;
 	for(args = args->cdr; nil != args; args = args->cdr)
 	{
-		if(strcmp(temp, args->car->string))
+		if(!match(temp, args->car->string))
 		{
 			return nil;
 		}
@@ -476,7 +479,8 @@ struct cell* prim_freecell(struct cell* args)
 {
 	if(nil == args)
 	{
-		printf("Remaining Cells: %ld\n", left_to_take);
+		file_print("Remaining Cells: ", stdout);
+		file_print(numerate_number(left_to_take), stdout);
 		return nil;
 	}
 	return make_int(left_to_take);
@@ -506,7 +510,8 @@ struct cell* prim_string_to_list(struct cell* args)
 struct cell* make_string(char* a);
 int list_to_string(int index, char* string, struct cell* args)
 {
-	for(struct cell* i = args; nil != i; i = i->cdr)
+	struct cell* i;
+	for(i = args; nil != i; i = i->cdr)
 	{
 		if(CHAR == i->car->type)
 		{
@@ -524,7 +529,7 @@ int list_to_string(int index, char* string, struct cell* args)
 struct cell* prim_list_to_string(struct cell* args)
 {
 	if(nil == args) return nil;
-	char* string = calloc(max_string + 2, sizeof(char));
+	char* string = calloc(MAX_STRING + 2, sizeof(char));
 	list_to_string(0, string, args);
 	return make_string(string);
 }
@@ -532,10 +537,10 @@ struct cell* prim_list_to_string(struct cell* args)
 struct cell* prim_echo(struct cell* args)
 {
 	if(nil == args) return nil;
-	if(nil == args->car) echo = false;
+	if(nil == args->car) echo = FALSE;
 	if(tee == args->car)
 	{
-		echo = true;
+		echo = TRUE;
 		return make_string("");
 	}
 	return args->car;

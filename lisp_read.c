@@ -16,13 +16,13 @@
  */
 
 #include "lisp.h"
-#include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 
 FILE* source_file;
-bool Reached_EOF;
+int Reached_EOF;
 
-static struct cell* token_stack;
+struct cell* token_stack;
 struct cell* make_sym(char* name);
 struct cell* intern(char *name);
 struct cell* findsym(char *name);
@@ -30,23 +30,23 @@ struct cell* findsym(char *name);
 /****************************************************************
  *      "Convert a string into a list of tokens."               *
  ****************************************************************/
-struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
+struct cell* tokenize(struct cell* head, char* fullstring, int size)
 {
-	int32_t i = 0;
-	bool done = false;
+	int i = 0;
+	int done = FALSE;
 	if((0 >= size) || (0 == fullstring[0]))
 	{
 		return head;
 	}
 
-	char *store = calloc(max_string + 1, sizeof(char));
+	char *store = calloc(MAX_STRING + 1, sizeof(char));
 
 	do
 	{
-		int32_t c = fullstring[i];
-		if((i > size) || (max_string <= i))
+		int c = fullstring[i];
+		if((i > size) || (MAX_STRING <= i))
 		{
-			done = true;
+			done = TRUE;
 		}
 		else if(34 == c)
 		{
@@ -58,14 +58,14 @@ struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 				i = i + 1;
 			}
 			i = i + 1;
-			done = true;
+			done = TRUE;
 		}
 		else
 		{
 			if((' ' == c) || ('\t' == c) || ('\n' == c) | ('\r' == c))
 			{
 				i = i + 1;
-				done = true;
+				done = TRUE;
 			}
 			else
 			{
@@ -90,22 +90,22 @@ struct cell* tokenize(struct cell* head, char* fullstring, int32_t size)
 }
 
 
-bool is_integer(char* a)
+int is_integer(char* a)
 {
 	if(('0' <= a[0]) && ('9' >= a[0]))
 	{
-		return true;
+		return TRUE;
 	}
 
 	if('-' == a[0])
 	{
 		if(('0' <= a[1]) && ('9' >= a[1]))
 		{
-			return true;
+			return TRUE;
 		}
 	}
 
-	return false;
+	return FALSE;
 }
 
 
@@ -137,7 +137,7 @@ struct cell* atom(struct cell* a)
 	if(is_integer(a->string))
 	{
 		a->type = INT;
-		a->value = strtol(a->string, NULL, 0);
+		a->value = numerate_string(a->string);
 		return a;
 	}
 
@@ -162,7 +162,7 @@ struct cell* readobj()
 	struct cell* head = token_stack;
 	token_stack = head->cdr;
 	head->cdr = NULL;
-	if (! strncmp("(", head->string, max_string))
+	if (match("(", head->string))
 	{
 		return readlist();
 	}
@@ -173,14 +173,14 @@ struct cell* readobj()
 struct cell* readlist()
 {
 	struct cell* head = token_stack;
-	if (! strncmp(")", head->string, max_string))
+	if (match(")", head->string))
 	{
 		token_stack = head->cdr;
 		return nil;
 	}
 
 	struct cell* tmp = readobj();
-//	token_stack = head->cdr;
+/*	token_stack = head->cdr; */
 	return make_cons(tmp,readlist());
 }
 
@@ -203,7 +203,7 @@ struct cell* reverse_list(struct cell* head)
 /****************************************************
  *     "Read a Scheme expression from a string."    *
  ****************************************************/
-struct cell* parse(char* program, int32_t size)
+struct cell* parse(char* program, int size)
 {
 	token_stack = tokenize(NULL, program, size);
 	if(NULL == token_stack)
@@ -217,14 +217,13 @@ struct cell* parse(char* program, int32_t size)
 /****************************************************
  * Do the heavy lifting of reading an s-expreesion  *
  ****************************************************/
-uint32_t Readline(FILE* source_file, char* temp)
+unsigned Readline(FILE* source_file, char* temp)
 {
-	char store[max_string + 2] = {0};
-	int32_t c;
-	uint32_t i;
-	uint32_t depth = 0;
+	int c;
+	unsigned i;
+	unsigned depth = 0;
 
-	for(i = 0; i < max_string; i = i + 1)
+	for(i = 0; i < MAX_STRING; i = i + 1)
 	{
 restart_comment:
 		c = fgetc(source_file);
@@ -232,29 +231,29 @@ restart_comment:
 		{
 			return i;
 		}
-		else if(59 == c)
+		else if(';' == c)
 		{
 			/* drop everything until we hit newline */
-			while(10 != c)
+			while('\n' != c)
 			{
 				c = fgetc(source_file);
 			}
 			goto restart_comment;
 		}
-		else if(34 == c)
+		else if('"' == c)
 		{ /* Deal with strings */
-			store[i] = (char)c;
+			temp[i] = c;
 			i = i + 1;
 			c = fgetc(source_file);
-			while(34 != c)
+			while('"' != c)
 			{
-				store[i] = (char)c;
+				temp[i] = c;
 				i = i + 1;
 				c = fgetc(source_file);
 			}
-			store[i] = (char)c;
+			temp[i] = c;
 		}
-		else if((0 == depth) && ((10 == c) || (13 == c) || (32 == c) || (9 == c)))
+		else if((0 == depth) && (('\n' == c) || ('\r' == c) || (' ' == c) || ('\t' == c)))
 		{
 			goto Line_complete;
 		}
@@ -270,14 +269,14 @@ restart_comment:
 				depth = depth - 1;
 			}
 
-			store[i] = ' ';
-			store[i+1] = c;
-			store[i+2] = ' ';
+			temp[i] = ' ';
+			temp[i+1] = c;
+			temp[i+2] = ' ';
 			i = i + 2;
 		}
 		else
 		{
-			store[i] = (char)c;
+			temp[i] = c;
 		}
 	}
 
@@ -287,6 +286,5 @@ Line_complete:
 		return Readline(source_file, temp);
 	}
 
-	strncpy(temp, store, max_string);
 	return i;
 }

@@ -15,45 +15,55 @@
  * along with stage0.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
+#include "gcc_req.h"
 
-enum otype
-{
-	FREE = 1,
-	MARKED = (1 << 1),
-	INT = (1 << 2),
-	SYM = (1 << 3),
-	CONS = (1 << 4),
-	PROC = (1 << 5),
-	PRIMOP = (1 << 6),
-	CHAR = (1 << 7),
-	STRING = (1 << 8)
-};
+//CONSTANT FREE 1
+#define FREE 1
+//CONSTANT MARKED 2
+#define MARKED 2
+//CONSTANT INT 4
+#define INT 4
+//CONSTANT SYM 8
+#define SYM 8
+//CONSTANT CONS 16
+#define CONS 16
+//CONSTANT PROC 32
+#define PROC 32
+//CONSTANT PRIMOP 64
+#define PRIMOP 64
+//CONSTANT CHAR 128
+#define CHAR 128
+//CONSTANT STRING 256
+#define STRING 256
 
-typedef struct cell* (Operation)(struct cell *);
+// CONSTANT FALSE 0
+#define FALSE 0
+// CONSTANT TRUE 1
+#define TRUE 1
 
 struct cell
 {
-	enum otype type;
+	int type;
 	union
 	{
 		struct cell* car;
 		int value;
 		char* string;
-		Operation* function;
+		FUNCTION* function;
 	};
 	struct cell* cdr;
 	struct cell* env;
 };
 
-#define max_string 4094
+// CONSTANT MAX_STRING 4096
+#define MAX_STRING 4096
 
+/* Common functions */
 struct cell* make_cons(struct cell* a, struct cell* b);
+int numerate_string(char *a);
+char* numerate_number(int a);
+int match(char* a, char* b);
+void file_print(char* s, FILE* f);
 
 /* Global objects */
 struct cell *all_symbols;
@@ -73,5 +83,5 @@ struct cell *current;
 FILE* input;
 FILE* file_output;
 FILE* console_output;
-bool echo;
-int64_t left_to_take;
+int echo;
+int left_to_take;
