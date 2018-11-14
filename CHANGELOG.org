@@ -31,6 +31,7 @@ Added support for Hex numbers being read in provided they are prefixed by 0x
 Added ability to select file output
 Added ability to select console output
 Added ability to change memory allocation
+Added M2-Planet build target and script
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation

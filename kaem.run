@@ -1,0 +1,61 @@
+#! /bin/sh
+## Copyright (C) 2017 Jeremiah Orians
+## This file is part of M2-Planet.
+##
+## M2-Planet is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## M2-Planet is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with M2-Planet.  If not, see <http://www.gnu.org/licenses/>.
+
+set -eux
+
+M2=${M2-../M2-Planet}
+
+# Build the test
+M2-Planet -f lisp.h \
+	-f $M2/functions/malloc.c \
+	-f $M2/functions/calloc.c \
+	-f functions/numerate_number.c \
+	-f functions/match.c \
+	-f functions/file.c \
+	-f functions/file_print.c \
+	-f $M2/functions/exit.c \
+	-f lisp.c \
+	-f lisp_cell.c \
+	-f lisp_eval.c \
+	-f lisp_print.c \
+	-f lisp_read.c \
+	--debug \
+	-o bin/lisp.M1 || exit 1
+
+# Build debug footer
+blood-elf -f bin/lisp.M1 \
+	-o bin/lisp-footer.M1 || exit 2
+
+# Macro assemble with libc written in M1-Macro
+M1 -f $M2/test/common_x86/x86_defs.M1 \
+	-f $M2/functions/libc-core.M1 \
+	-f bin/lisp.M1 \
+	-f bin/lisp-footer.M1 \
+	--LittleEndian \
+	--Architecture 1 \
+	-o bin/lisp.hex2 || exit 3
+
+# Resolve all linkages
+hex2 -f $M2/test/common_x86/ELF-i386-debug.hex2 \
+	-f bin/lisp.hex2 \
+	--LittleEndian \
+	--Architecture 1 \
+	--BaseAddress 0x8048000 \
+	-o bin/slow_lisp-M2 \
+	--exec_enable || exit 4
+
+exit 0

@@ -3,6 +3,9 @@ VPATH = bin:test:test/results
 
 all: slow_lisp
 
+slow_lisp-M2: lisp.h lisp.c lisp_cell.c lisp_eval.c lisp_print.c lisp_read.c | bin
+	./kaem.run
+
 slow_lisp-debug: lisp.h lisp.c lisp_cell.c lisp_eval.c lisp_print.c lisp_read.c | bin
 	gcc -ggdb \
 	lisp.h \
