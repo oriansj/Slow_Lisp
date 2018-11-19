@@ -35,6 +35,10 @@
 #define CHAR 128
 //CONSTANT STRING 256
 #define STRING 256
+//CONSTANT FILE_PORT 512
+#define FILE_PORT 512
+//CONSTANT EOF_object 1024
+#define EOF_object 1024
 
 // CONSTANT FALSE 0
 #define FALSE 0
@@ -50,13 +54,15 @@ struct cell
 		int value;
 		char* string;
 		FUNCTION* function;
+		FILE* file;
 	};
 	struct cell* cdr;
-	struct cell* env;
+	union
+	{
+		struct cell* env;
+		int size;
+	};
 };
-
-// CONSTANT MAX_STRING 4096
-#define MAX_STRING 4096
 
 /* Common functions */
 struct cell* make_cons(struct cell* a, struct cell* b);
@@ -85,3 +91,5 @@ FILE* file_output;
 FILE* console_output;
 int echo;
 int left_to_take;
+
+char* memory_block;

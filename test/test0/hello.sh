@@ -1,6 +1,12 @@
 #! /bin/sh
 set -x
-out=$( bin/slow_lisp -f test/test0/hello.scm 2>&1)
-[ "$out" = "(Hello, Mescc!)" ] || exit 1
-echo "$out" >| test/results/test0-result
+
+{
+cat <<-EOF
+(quote (Hello, Mescc!))
+(HALT)
+EOF
+} >| test/test0/temp
+
+./bin/slow_lisp --file test/test0/temp --console test/results/test0-result || exit 1
 exit 0

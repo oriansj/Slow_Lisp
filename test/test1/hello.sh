@@ -1,8 +1,17 @@
 #! /bin/sh
 set -x
-out=$( bin/slow_lisp -f test/test1/test1.scm 2>&1)
-[ "$out" = "#<PROC>
-(1 2 3 4 5)
-(1 2 3 4 5 6 7)" ] || exit 1
-echo "$out" >| test/results/test1-result
+
+{
+cat <<-EOF
+(define append (lambda (x y)
+	(cond
+		((null? x) y)
+		(#t (cons (car x) (append (cdr x) y))))))
+(define foo (list 1 2 3 4 5))
+(append (append foo (list 6)) (list 7))
+(HALT)
+EOF
+} >| test/test1/temp
+
+./bin/slow_lisp --file test/test1/temp --console test/results/test1-result || exit 1
 exit 0

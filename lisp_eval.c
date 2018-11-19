@@ -16,6 +16,20 @@
  */
 
 #include "lisp.h"
+/* Imported functions */
+struct cell* prim_output(struct cell* args, FILE* out);
+FILE* open_file(char* name, char* mode);
+void garbage_collect();
+struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env);
+struct cell* make_char(int a);
+struct cell* make_int(int a);
+struct cell* make_file(FILE* a);
+struct cell* make_prim(void* fun);
+struct cell* make_sym(char* name);
+struct cell* make_string(char* a);
+struct cell* make_sym(char* name);
+struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env);
+struct cell* make_eof();
 
 /* Support functions */
 struct cell* findsym(char *name)
@@ -30,8 +44,6 @@ struct cell* findsym(char *name)
 	}
 	return nil;
 }
-
-struct cell* make_sym(char* name);
 
 struct cell* intern(char *name)
 {
@@ -76,7 +88,6 @@ struct cell* assoc(struct cell* key, struct cell* alist)
 
 /*** Evaluator (Eval/Apply) ***/
 struct cell* eval(struct cell* exp, struct cell* env);
-struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env);
 struct cell* evlis(struct cell* exps, struct cell* env)
 {
 	if(exps == nil) return nil;
@@ -136,7 +147,6 @@ struct cell* evcond(struct cell* exp, struct cell* env)
 	return evcond(exp->cdr, env);
 }
 
-void garbage_collect();
 struct cell* evwhile(struct cell* exp, struct cell* env)
 {
 	if(nil == exp) return nil;
@@ -225,13 +235,24 @@ struct cell* prim_apply(struct cell* args)
 	return apply(args->car, args->cdr->car);
 }
 
+struct cell* prim_atom(struct cell* args)
+{
+	if(CONS == args->car->type) return nil;
+	return tee;
+}
+
 struct cell* nullp(struct cell* args)
 {
 	if(nil == args->car) return tee;
 	return nil;
 }
 
-struct cell* make_int(int a);
+struct cell* prim_eofp (struct cell* args)
+{
+	if(EOF_object == args->car->type) return tee;
+	return nil;
+}
+
 struct cell* prim_sum(struct cell* args)
 {
 	if(nil == args) return nil;
@@ -419,35 +440,10 @@ struct cell* prim_get_type(struct cell* args)
 	return make_int(args->car->type);
 }
 
-struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* env);
 struct cell* prim_set_type(struct cell* args)
 {
 	if(nil == args) return nil;
 	return make_cell(args->cdr->car->value, args->car->car, args->car->cdr, args->car->env);
-}
-
-struct cell* prim_output(struct cell* args, FILE* out)
-{
-	for(; nil != args; args = args->cdr)
-	{
-		if(INT == args->car->type)
-		{
-			file_print(numerate_number(args->car->value), out);
-		}
-		else if(CHAR == args->car->type)
-		{
-			fputc(args->car->value, out);
-		}
-		else if(CONS == args->car->type)
-		{
-			prim_output(args->car, out);
-		}
-		else
-		{
-			file_print(args->car->string, out);
-		}
-	}
-	return tee;
 }
 
 struct cell* prim_stringeq(struct cell* args)
@@ -472,7 +468,17 @@ struct cell* prim_display(struct cell* args)
 
 struct cell* prim_write(struct cell* args)
 {
-	return prim_output(args, file_output);
+	if(nil == args->cdr)
+	{
+		return prim_output(args, file_output);
+	}
+	else if(FILE_PORT == args->cdr->car->type)
+	{
+		return prim_output(args, args->cdr->car->file);
+	}
+
+	file_print("You passed something that isn't a file pointer to write in position 2\n", stderr);
+	exit(EXIT_FAILURE);
 }
 
 struct cell* prim_freecell(struct cell* args)
@@ -486,7 +492,6 @@ struct cell* prim_freecell(struct cell* args)
 	return make_int(left_to_take);
 }
 
-struct cell* make_char(int a);
 struct cell* string_to_list(char* string)
 {
 	if(NULL == string) return nil;
@@ -507,31 +512,88 @@ struct cell* prim_string_to_list(struct cell* args)
 	return nil;
 }
 
-struct cell* make_string(char* a);
-int list_to_string(int index, char* string, struct cell* args)
+int list_length(struct cell* args)
 {
+	if(nil == args) return 0;
+	int size = 0;
 	struct cell* i;
-	for(i = args; nil != i; i = i->cdr)
+	for(i = args->car; nil != i; i = i->cdr)
+	{
+		size = size + 1;
+	}
+	return size;
+}
+
+char* list_to_string(struct cell* args)
+{
+	char* string = calloc(list_length(args) + 1, sizeof(char));
+	int index = 0;
+	struct cell* i;
+	for(i = args->car; nil != i; i = i->cdr)
 	{
 		if(CHAR == i->car->type)
 		{
 			string[index] = i->car->value;
 			index = index + 1;
 		}
-		if(CONS == i->car->type)
+		else
 		{
-			index = list_to_string(index, string, i->car);
+			file_print("Wrong type recieved\n", stdout);
+			exit(EXIT_FAILURE);
 		}
 	}
-	return index;
+	return string;
+}
+
+struct cell* prim_list_length(struct cell* args)
+{
+	if(nil == args) return nil;
+	return make_int(list_length(args));
 }
 
 struct cell* prim_list_to_string(struct cell* args)
 {
 	if(nil == args) return nil;
-	char* string = calloc(MAX_STRING + 2, sizeof(char));
-	list_to_string(0, string, args);
-	return make_string(string);
+	return make_string(list_to_string(args));
+}
+
+struct cell* prim_string_size(struct cell* args)
+{
+	if(nil == args) return nil;
+	if(args->car->type != STRING)
+	{
+		file_print("Wrong type recieved\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+	return make_int(args->car->size);
+}
+
+struct cell* prim_open(struct cell* args, char* mode)
+{
+	if(nil == args)
+	{
+		file_print("Did not recieve a file name\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	if(STRING != args->car->type)
+	{
+		file_print("File name must be a string\n", stderr);
+		exit(EXIT_FAILURE);
+	}
+
+	return make_file(open_file(args->car->string, mode));
+}
+
+
+struct cell* prim_open_read(struct cell* args)
+{
+	return prim_open(args, "r");
+}
+
+struct cell* prim_open_write(struct cell* args)
+{
+	return prim_open(args, "w");
 }
 
 struct cell* prim_echo(struct cell* args)
@@ -549,6 +611,12 @@ struct cell* prim_echo(struct cell* args)
 struct cell* prim_read_byte(struct cell* args)
 {
 	if(nil == args) return make_char(fgetc(input));
+	else if(FILE_PORT == args->car->type)
+	{
+		int c = fgetc(args->car->file);
+		if(EOF == c) return make_eof();
+		return make_char(c);
+	}
 	return nil;
 }
 
@@ -574,9 +642,6 @@ void spinup(struct cell* sym, struct cell* prim)
 }
 
 /*** Initialization ***/
-struct cell* intern(char *name);
-struct cell* make_prim(void* fun);
-struct cell* make_sym(char* name);
 void init_sl3()
 {
 	/* Special symbols */
@@ -611,6 +676,8 @@ void init_sl3()
 	/* Add Primitive Specials */
 	spinup(make_sym("apply"), make_prim(prim_apply));
 	spinup(make_sym("null?"), make_prim(nullp));
+	spinup(make_sym("atom?"), make_prim(prim_atom));
+	spinup(make_sym("eof-object?"), make_prim(prim_eofp));
 	spinup(make_sym("+"), make_prim(prim_sum));
 	spinup(make_sym("-"), make_prim(prim_sub));
 	spinup(make_sym("*"), make_prim(prim_prod));
@@ -624,6 +691,8 @@ void init_sl3()
 	spinup(make_sym("="), make_prim(prim_numeq));
 	spinup(make_sym("<="), make_prim(prim_numle));
 	spinup(make_sym("<"), make_prim(prim_numlt));
+	spinup(make_sym("open-input-file"), make_prim(prim_open_read));
+	spinup(make_sym("open-output-file"), make_prim(prim_open_write));
 	spinup(make_sym("display"), make_prim(prim_display));
 	spinup(make_sym("write"), make_prim(prim_write));
 	spinup(make_sym("free_mem"), make_prim(prim_freecell));
@@ -631,13 +700,15 @@ void init_sl3()
 	spinup(make_sym("set-type!"), make_prim(prim_set_type));
 	spinup(make_sym("list?"), make_prim(prim_listp));
 	spinup(make_sym("list"), make_prim(prim_list));
+	spinup(make_sym("list-length"), make_prim(prim_list_length));
 	spinup(make_sym("list->string"), make_prim(prim_list_to_string));
 	spinup(make_sym("string->list"), make_prim(prim_string_to_list));
+	spinup(make_sym("string-length"), make_prim(prim_string_size));
 	spinup(make_sym("string=?"), make_prim(prim_stringeq));
 	spinup(make_sym("cons"), make_prim(prim_cons));
 	spinup(make_sym("car"), make_prim(prim_car));
 	spinup(make_sym("cdr"), make_prim(prim_cdr));
 	spinup(make_sym("echo"), make_prim(prim_echo));
-	spinup(make_sym("read-byte"), make_prim(prim_read_byte));
+	spinup(make_sym("read-char"), make_prim(prim_read_byte));
 	spinup(make_sym("HALT"), make_prim(prim_halt));
 }

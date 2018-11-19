@@ -37,6 +37,13 @@ void update_remaining()
 	left_to_take = count;
 }
 
+int string_length(char* a)
+{
+	int i = 0;
+	while(0 != a[i]) i = i + 1;
+	return i;
+}
+
 struct cell* insert_ordered(struct cell* i, struct cell* list)
 {
 	if(NULL == list)
@@ -212,32 +219,36 @@ struct cell* make_cell(int type, struct cell* a, struct cell* b, struct cell* en
 
 struct cell* make_int(int a)
 {
-	struct cell* c = pop_cons();
-	c->type = INT;
+	struct cell* c = make_cell(INT, NULL, NULL, NULL);
 	c->value = a;
+	return c;
+}
+
+struct cell* make_file(FILE* a)
+{
+	struct cell* c = make_cell(FILE_PORT, NULL, NULL, NULL);
+	c->file = a;
 	return c;
 }
 
 struct cell* make_char(int a)
 {
-	struct cell* c = pop_cons();
-	c->type = CHAR;
+	struct cell* c = make_cell(CHAR, NULL, NULL, NULL);
 	c->value = a;
 	return c;
 }
 
 struct cell* make_string(char* a)
 {
-	struct cell* c = pop_cons();
-	c->type = STRING;
+	struct cell* c = make_cell(STRING, NULL, NULL, NULL);
 	c->string = a;
+	c->size = string_length(c->string);
 	return c;
 }
 
 struct cell* make_sym(char* name)
 {
-	struct cell* c = pop_cons();
-	c->type = SYM;
+	struct cell* c = make_cell(SYM, NULL, NULL, NULL);
 	c->string = name;
 	return c;
 }
@@ -254,8 +265,12 @@ struct cell* make_proc(struct cell* a, struct cell* b, struct cell* env)
 
 struct cell* make_prim(void* fun)
 {
-	struct cell* c = pop_cons();
-	c->type = PRIMOP;
+	struct cell* c = make_cell(PRIMOP, NULL, NULL, NULL);
 	c->function = fun;
 	return c;
+}
+
+struct cell* make_eof()
+{
+	return make_cell(EOF_object, NULL, NULL, NULL);
 }

@@ -20,6 +20,7 @@
 void writeobj(FILE *output_file, struct cell* op)
 {
 	if(!echo) return;
+	if(NULL == op) return;
 
 	if(INT == op->type)
 	{
@@ -65,7 +66,17 @@ void writeobj(FILE *output_file, struct cell* op)
 	}
 	else if(STRING == op->type)
 	{
+		fputc('"', output_file);
 		file_print(op->string, output_file);
+		fputc('"', output_file);
+	}
+	else if(FILE_PORT == op->type)
+	{
+		file_print("#<input>", output_file);
+	}
+	else if(EOF_object == op->type)
+	{
+		file_print("#<eof>", output_file);
 	}
 	else
 	{
@@ -74,4 +85,10 @@ void writeobj(FILE *output_file, struct cell* op)
 		file_print(" is unknown\nPrint aborting hard\n", stderr);
 		exit(EXIT_FAILURE);
 	}
+}
+
+struct cell* prim_output(struct cell* args, FILE* out)
+{
+	writeobj(out, args->car);
+	return NULL;
 }

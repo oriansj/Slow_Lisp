@@ -24,68 +24,93 @@ int Reached_EOF;
 
 struct cell* token_stack;
 struct cell* make_sym(char* name);
+struct cell* make_string(char* a);
 struct cell* intern(char *name);
 struct cell* findsym(char *name);
+
+/****************************************************************
+ *           Functions for reducing wasted memory               *
+ ****************************************************************/
+void reset_block(char* a)
+{
+	int c;
+	do
+	{
+		c = a[0];
+		a[0] = 0;
+		a = a + 1;
+	} while(0 != c);
+}
+
+char* copy_string(char* target, char* source)
+{
+	while(0 != source[0])
+	{
+		target[0] = source[0];
+		target = target + 1;
+		source = source + 1;
+	}
+	return target;
+}
 
 /****************************************************************
  *      "Convert a string into a list of tokens."               *
  ****************************************************************/
 struct cell* tokenize(struct cell* head, char* fullstring, int size)
 {
-	int i = 0;
+	int string_index = 0;
 	int done = FALSE;
 	if((0 >= size) || (0 == fullstring[0]))
 	{
 		return head;
 	}
 
-	char *store = calloc(MAX_STRING + 1, sizeof(char));
+	reset_block(memory_block);
 
 	do
 	{
-		int c = fullstring[i];
-		if((i > size) || (MAX_STRING <= i))
+		int c = fullstring[string_index];
+		if(string_index > size)
 		{
 			done = TRUE;
 		}
 		else if(34 == c)
 		{
-			store[i] = c;
-			i = i + 1;
-			while(34 != fullstring[i])
+			memory_block[string_index] = c;
+			string_index = string_index + 1;
+			while(34 != fullstring[string_index])
 			{
-				store[i] = fullstring[i];
-				i = i + 1;
+				memory_block[string_index] = fullstring[string_index];
+				string_index = string_index + 1;
 			}
-			i = i + 1;
+			string_index = string_index + 1;
 			done = TRUE;
 		}
 		else
 		{
 			if((' ' == c) || ('\t' == c) || ('\n' == c) | ('\r' == c))
 			{
-				i = i + 1;
+				string_index = string_index + 1;
 				done = TRUE;
 			}
 			else
 			{
-				store[i] = c;
-				i = i + 1;
+				memory_block[string_index] = c;
+				string_index = string_index + 1;
 			}
 		}
 	} while(!done);
 
-	if(i > 1)
+	if(string_index > 1)
 	{
+		char* store = calloc(string_index + 1, sizeof(char));
+		copy_string(store, memory_block);
 		struct cell* temp = make_sym(store);
 		temp->cdr = head;
 		head = temp;
 	}
-	else
-	{
-		free(store);
-	}
-	head = tokenize(head, (fullstring+i), (size - i));
+
+	head = tokenize(head, (fullstring+string_index), (size - string_index));
 	return head;
 }
 
@@ -128,9 +153,7 @@ struct cell* atom(struct cell* a)
 	/* Check for strings */
 	if(34 == a->string[0])
 	{
-		a->type = STRING;
-		a->string = a->string + 1;
-		return a;
+		return make_string(a->string + 1);
 	}
 
 	/* Check for integer */
@@ -217,13 +240,13 @@ struct cell* parse(char* program, int size)
 /****************************************************
  * Do the heavy lifting of reading an s-expreesion  *
  ****************************************************/
-unsigned Readline(FILE* source_file, char* temp)
+unsigned Readline(FILE* source_file, char* temp, unsigned max_string)
 {
 	int c;
-	unsigned i;
+	unsigned i = 0;
 	unsigned depth = 0;
 
-	for(i = 0; i < MAX_STRING; i = i + 1)
+	for(i = 0; i < max_string; i = i + 1)
 	{
 restart_comment:
 		c = fgetc(source_file);
@@ -281,9 +304,9 @@ restart_comment:
 	}
 
 Line_complete:
-	if(1 > i)
+	if(0 == i)
 	{
-		return Readline(source_file, temp);
+		return Readline(source_file, temp, max_string);
 	}
 
 	return i;

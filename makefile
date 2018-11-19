@@ -63,7 +63,12 @@ Coverage-cleanup:
 
 
 # tests
-test: test0-result test1-result | results
+test: \
+	test0-result \
+	test1-result \
+	test2-result \
+	test3-result \
+	test4-result | results
 	sha256sum -c test/test.answers
 
 test0-result: results slow_lisp
@@ -71,6 +76,15 @@ test0-result: results slow_lisp
 
 test1-result: results slow_lisp
 	test/test1/hello.sh
+
+test2-result: results slow_lisp
+	test/test2/hello.sh
+
+test3-result: results slow_lisp
+	test/test3/hello.sh
+
+test4-result: results slow_lisp
+	test/test4/hello.sh
 
 # Generate test answers
 .PHONY: Generate-test-answers

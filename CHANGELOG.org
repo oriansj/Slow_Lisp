@@ -32,6 +32,7 @@ Added ability to select file output
 Added ability to select console output
 Added ability to change memory allocation
 Added M2-Planet build target and script
+Added support for reading and writing to files
 
 ** Changed
 Altered order of arguments in list_to_string function to simplify assembly implementation
@@ -42,6 +43,7 @@ Made set-type be a copying rather than overwriting operation
 Gave assoc better names and let it return nil when none are found
 Broke out non-standard functions into lisp.scm
 Changed the behavior of (while #t (expression)) to allow for infinite loops
+Changed behavior of write
 
 ** Fixed
 Fixed bug in line comments

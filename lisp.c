@@ -16,6 +16,8 @@
  */
 
 #include "lisp.h"
+// CONSTANT MAX_STRING 4096
+#define MAX_STRING 4096
 
 struct file_list
 {
@@ -23,22 +25,26 @@ struct file_list
 	FILE* file;
 };
 
+char* message;
+
 /* Prototypes */
 struct cell* eval(struct cell* exp, struct cell* env);
 void init_sl3();
-int Readline(FILE* source_file, char* temp);
+int Readline(FILE* source_file, char* temp, unsigned max_string);
 struct cell* parse(char* program, int size);
 void writeobj(FILE *ofp, struct cell* op);
 void garbage_init(int number_of_cells);
 void garbage_collect();
+void reset_block(char* a);
 
 /* Read Eval Print Loop*/
 int REPL(FILE* in, FILE *out)
 {
 	int read;
 	input = in;
-	char* message = calloc(MAX_STRING + 2, sizeof(char));
-	read = Readline(in, message);
+	/* Reset contents of message */
+	reset_block(message);
+	read = Readline(in, message, MAX_STRING);
 	if(0 == read)
 	{
 		return TRUE;
@@ -64,6 +70,32 @@ void recursively_evaluate(struct file_list* a)
 	}
 }
 
+FILE* open_file(char* name, char* mode)
+{
+	FILE* f = fopen(name, mode);
+
+	if(NULL == f)
+	{
+		file_print("Unable to open file ", stderr);
+		file_print(name, stderr);
+		if('r' == mode[0])
+		{
+			file_print(" for reading\n", stderr);
+		}
+		else if('w' == mode[0])
+		{
+			file_print(" for writing\n", stderr);
+		}
+		else
+		{
+			file_print(" with unknown mode\n", stderr);
+		}
+		exit(EXIT_FAILURE);
+	}
+
+	return f;
+}
+
 /*** Main Driver ***/
 int main(int argc, char **argv)
 {
@@ -81,27 +113,13 @@ int main(int argc, char **argv)
 		}
 		else if(match(argv[i], "-c") || match(argv[i], "--console"))
 		{
-			console_output = fopen(argv[i + 1], "w");
-			if(NULL == console_output)
-			{
-				file_print("The file: ", stderr);
-				file_print(argv[i + 1], stderr);
-				file_print(" does not appear writable\n", stderr);
-				exit(EXIT_FAILURE);
-			}
+			console_output = open_file(argv[i + 1], "w");
 			i = i + 2;
 		}
 		else if(match(argv[i], "-f") || match(argv[i], "--file"))
 		{
 			struct file_list* new = calloc(1, sizeof(struct file_list));
-			new->file = fopen(argv[i + 1], "r");
-			if(NULL == new->file)
-			{
-				file_print("The file: ", stderr);
-				file_print(argv[i + 1], stderr);
-				file_print(" does not appear readable\n", stderr);
-				exit(EXIT_FAILURE);
-			}
+			new->file = open_file(argv[i + 1], "r");
 			new->next = essential;
 			essential = new;
 			i = i + 2;
@@ -120,14 +138,7 @@ int main(int argc, char **argv)
 		}
 		else if(match(argv[i], "-o") || match(argv[i], "--output"))
 		{
-			file_output =  fopen(argv[i + 1], "w");
-			if(NULL == file_output)
-			{
-				file_print("The file: ", stderr);
-				file_print(argv[i + 1], stderr);
-				file_print(" does not appear writable\n", stderr);
-				exit(EXIT_FAILURE);
-			}
+			file_output = open_file(argv[i + 1], "w");
 			i = i + 2;
 		}
 		else if(match(argv[i], "-v") || match(argv[i], "--version"))
@@ -143,6 +154,8 @@ int main(int argc, char **argv)
 	}
 
 	/* Our most important initializations */
+	memory_block = calloc(MAX_STRING, sizeof(char));
+	message = calloc(MAX_STRING + 2, sizeof(char));
 	garbage_init(number_of_cells);
 	init_sl3();
 	int Reached_EOF;
