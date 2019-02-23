@@ -46,14 +46,14 @@ M1 -f $M2/test/common_x86/x86_defs.M1 \
 	-f bin/lisp.M1 \
 	-f bin/lisp-footer.M1 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	-o bin/lisp.hex2 || exit 3
 
 # Resolve all linkages
 hex2 -f $M2/test/common_x86/ELF-i386-debug.hex2 \
 	-f bin/lisp.hex2 \
 	--LittleEndian \
-	--Architecture 1 \
+	--architecture x86 \
 	--BaseAddress 0x8048000 \
 	-o bin/slow_lisp-M2 \
 	--exec_enable || exit 4

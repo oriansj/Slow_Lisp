@@ -44,6 +44,7 @@ Gave assoc better names and let it return nil when none are found
 Broke out non-standard functions into lisp.scm
 Changed the behavior of (while #t (expression)) to allow for infinite loops
 Changed behavior of write
+Harmonized M2-Planet build behavior with mescc-tools 0.6.0 release
 
 ** Fixed
 Fixed bug in line comments
